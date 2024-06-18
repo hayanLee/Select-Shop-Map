@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { signUpWithEmail } from '../../api/auth';
 import { Link } from 'react-router-dom';
 
+
 function SignUpPage() {
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
