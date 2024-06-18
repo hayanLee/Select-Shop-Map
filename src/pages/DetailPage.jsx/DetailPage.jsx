@@ -1,25 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { PiHeart, PiHeartFill } from 'react-icons/pi';
 
 const DetailPage = () => {
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+  };
+
   return (
     <div className="flex min-h-screen justify-center">
       <main className="w-full max-w-[1320px] p-4">
-        <div className="mt-[20px] flex space-x-6 rounded-lg bg-hover p-[48px_36px_30px_36px] shadow-lg">
+        <div className="mt-[20px] flex flex-col gap-6 rounded-lg bg-hover p-[48px_36px_30px_36px] shadow-lg md:flex-row">
           <img
             // src={require('../assets/image.jpg')} // 실제 이미지 경로로 변경
             alt="Store"
-            className="h-64 w-1/2 rounded-lg bg-white object-cover shadow-md"
+            className="h-64 w-full rounded-lg bg-white object-cover shadow-md md:w-1/2"
           />
-          <div className="relative w-1/2 rounded-lg bg-white p-6 shadow-md">
+          <div className="relative flex w-full flex-col rounded-lg bg-white p-6 shadow-md md:w-1/2">
             <h1 className="text-3xl font-bold">Title</h1>
             <p className="mt-2 text-gray-700">위치</p>
             <p className="mt-2 text-gray-700">위치</p>
             <p className="mt-2 text-gray-700">위치</p>
-            <button className="absolute bottom-4 right-4 text-point">❤️</button>
+            <button onClick={handleLike} className="absolute bottom-4 right-4 text-3xl text-point">
+              {isLiked ? <PiHeartFill /> : <PiHeart />}
+            </button>
           </div>
         </div>
 
-        <div className="mt-9 rounded-lg bg-hover p-[48px_36px_30px_36px] shadow-md">
+        <div className="mt-6 rounded-lg bg-hover p-[48px_36px_30px_36px] shadow-md">
           <section className="rounded-lg bg-white p-4 shadow-md">
             <div className="flex items-center space-x-[22px]">
               <textarea placeholder="리뷰를 남겨주세요" className="h-[70px] w-full rounded-lg border p-2" />
