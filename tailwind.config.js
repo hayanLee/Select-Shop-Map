@@ -11,7 +11,7 @@ export default {
         point: '#E0A8CD'
       },
       gridTemplateColumns: {
-        main: 'minmax(300px, 0.5fr) 2fr'
+        main: 'minmax(400px, 0.5fr) 2fr'
       }
     }
   },
