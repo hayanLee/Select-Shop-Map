@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signUp } from '../../components/signUp/SignUp';
+
 
 function SignUpPage() {
   const [nickname, setNickname] = useState('');
