@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { signUp } from '../../components/signUp/SignUp';
 
 function SignUpPage() {
   const [nickname, setNickname] = useState('');
@@ -19,7 +18,7 @@ function SignUpPage() {
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             placeholder="닉네임을 입력하세요."
-            className="h-12 w-full bg-input pl-4"
+            className="bg-input h-12 w-full pl-4"
           />
         </div>
         <div>
@@ -27,7 +26,7 @@ function SignUpPage() {
           <input
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 w-full bg-input pl-4"
+            className="bg-input h-12 w-full pl-4"
             placeholder=" 이메일을 입력하세요."
           />
         </div>
@@ -36,7 +35,7 @@ function SignUpPage() {
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="h-12 w-full bg-input pl-4"
+            className="bg-input h-12 w-full pl-4"
             placeholder=" 비밀번호를 입력하세요."
           />
         </div>
