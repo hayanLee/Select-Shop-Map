@@ -7,6 +7,13 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  //컴포넌트 마운트 시 초기화
+  useEffect(() => {
+    localStorage.removeItem('savedEmail');
+    localStorage.removeItem('savedPassword');
+  }, []);
+
+  //컴포넌트 마운트 시 로컬 스토리지에서 값 불러오기
   useEffect(() => {
     const savedEmail = localStorage.getItem('savedEmail');
     const savedPassword = localStorage.getItem('savedPassword');
@@ -14,6 +21,7 @@ function LoginPage() {
     if (savedPassword) setPassword(savedPassword);
   }, []);
 
+  //유효성 검사
   const validateForm = () => {
     if (!email || !password) {
       alert('이메일과 비밀번호를 입력하세요.');
@@ -31,17 +39,18 @@ function LoginPage() {
     return true;
   };
 
+  //폼 제출 핸들러
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     try {
       const userInfo = await LoginWithEmail({ email, password });
       if (userInfo) {
-        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        localStorage.setItem('sb-qqfwyfugvnciounpkmfi-auth-token', JSON.stringify({ user: userInfo }));
+        window.dispatchEvent(new Event('storage')); // localStorage 변경 이벤트 트리거 -> 다른 컴포넌트에서도 상태 변경 감지 가능
         navigate('/');
         setEmail('');
         setPassword('');
-        //로그인 성공 후 홈페이지로 이동, 입력 필드 초기화
       } else {
         console.error('로그인 후 사용자 정보를 받아오지 못했습니다.');
       }
@@ -61,7 +70,7 @@ function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-12 w-full bg-input pl-4 focus:outline-active"
+              className="h-12 w-full bg-input pl-4 focus:outline-active shadow-lg"
               placeholder="이메일을 입력하세요."
             />
           </div>
@@ -71,14 +80,14 @@ function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-12 w-full bg-input pl-4 focus:outline-active"
+              className="h-12 w-full bg-input pl-4 focus:outline-active shadow-lg"
               placeholder="비밀번호를 입력하세요."
             />
             <p className="mt-1 text-xs">비밀 번호는 6자리 이상이어야 합니다.</p>
           </div>
           <button className="mt-3 h-12 w-full bg-active pl-4 font-bold text-white hover:bg-hover">Log In</button>
         </form>
-        <Link to="/signup" className="mt-3">
+        <Link to="/signup" className="mt-3 text-[#3490dc]">
           아직 계정이 없으신가요? 회원 가입 하러가기
         </Link>
       </div>

@@ -25,6 +25,7 @@ function SignUpPage() {
     }
     return true;
   };
+  //유효성 검사 추가
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -40,11 +41,9 @@ function SignUpPage() {
       return;
     }
     await signUpWithEmail({ email, password, nickname });
-    // 입력 필드를 초기화
     setNickname('');
     setEmail('');
     setPassword('');
-    // 회원가입 후 페이지 이동
     navigate('/login');
   };
 
@@ -59,7 +58,7 @@ function SignUpPage() {
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               placeholder="닉네임을 입력하세요."
-              className="h-12 w-full bg-input pl-4 focus:outline-active"
+              className="h-12 w-full bg-input pl-4 focus:outline-active shadow-lg"
             />
           </div>
           <div>
@@ -68,7 +67,7 @@ function SignUpPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-12 w-full bg-input pl-4 focus:outline-active"
+              className="h-12 w-full bg-input pl-4 focus:outline-active shadow-lg"
               placeholder="이메일을 입력하세요."
             />
           </div>
@@ -78,13 +77,13 @@ function SignUpPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-12 w-full bg-input pl-4 focus:outline-active"
+              className="h-12 w-full bg-input pl-4 focus:outline-active shadow-lg"
               placeholder="비밀번호를 입력하세요."
             />
           </div>
           <button className="mt-12 h-12 w-full bg-active pl-4 font-bold text-white hover:bg-hover">회원가입</button>
         </form>
-        <Link to="/login" className="mt-3">
+        <Link to="/login" className="mt-3 text-[#3490dc]">
           이미 계정이 있으신가요? 로그인 하러가기
         </Link>
       </div>

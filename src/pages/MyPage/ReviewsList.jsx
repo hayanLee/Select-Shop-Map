@@ -1,13 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import supabase from '../../supabase/supabaseClient';
 
 const ReviewsList = ({ userId }) => {
-  // 임시 데이터(변경 예정/)
-  // 클릭 시 리뷰 작성했던 창으로 이동 구현 예정
-  const reviews = [
-    { id: '1', content: '기깔나네요.', created_at: '2023-01-01' },
-    { id: '2', content: '미쳤네요.', created_at: '2023-02-01' },
-    { id: '3', content: '폼미쳤네요.', created_at: '2023-03-01' }
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('id, content, created_at')
+          .eq('user_id', userId);
+
+        if (error) {
+          throw error;
+        }
+
+        setReviews(data);
+      } catch (error) {
+        console.error('리뷰를 불러오는 데 실패했습니다:', error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchReviews();
+    }
+  }, [userId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <ul className="list-none">

@@ -9,13 +9,13 @@ const MyPage = () => {
 
   const fetchNickname = async () => {
     try {
-      const session = JSON.parse(localStorage.getItem('sb-qqfwyfugvnciounpkmfi-auth-token'));
-      if (!session || !session.user) {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if (!userInfo || !userInfo.id) {
         console.error('No user info found in localStorage.');
         return;
       }
 
-      const userId = session.user.id;
+      const userId = userInfo.id;
       const { data, error } = await supabase
         .from('users')
         .select('nickname')
