@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { LoginWithEmail } from '../../api/auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('savedEmail');
@@ -14,11 +14,40 @@ function LoginPage() {
     if (savedPassword) setPassword(savedPassword);
   }, []);
 
+  const validateForm = () => {
+    if (!email || !password) {
+      alert('이메일과 비밀번호를 입력하세요.');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('올바른 이메일 형식이 아닙니다.');
+      return false;
+    }
+    if (password.length < 6) {
+      alert('비밀번호는 6자리 이상이어야 합니다.');
+      return false;
+    }
+    return true;
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
-    await LoginWithEmail({ email, password });
-    localStorage.setItem('savedEmail', email);
-    localStorage.setItem('savedPassword', password);
+    if (!validateForm()) return;
+    try {
+      const userInfo = await LoginWithEmail({ email, password });
+      if (userInfo) {
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        navigate('/');
+        setEmail('');
+        setPassword('');
+        //로그인 성공 후 홈페이지로 이동, 입력 필드 초기화
+      } else {
+        console.error('로그인 후 사용자 정보를 받아오지 못했습니다.');
+      }
+    } catch (error) {
+      console.error('로그인 실패:', error.message);
+    }
   };
 
   return (
@@ -45,16 +74,7 @@ function LoginPage() {
               className="h-12 w-full bg-input pl-4 focus:outline-active"
               placeholder="비밀번호를 입력하세요."
             />
-            <p className="mt-1 text-xs">비밀 번호는 6자리 이상이여야 합니다.</p>
-          </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={() => setRememberMe(!rememberMe)}
-              className="mr-2 h-6 w-6 rounded-md border-none"
-            />
-            <label>Remember me</label>
+            <p className="mt-1 text-xs">비밀 번호는 6자리 이상이어야 합니다.</p>
           </div>
           <button className="mt-3 h-12 w-full bg-active pl-4 font-bold text-white hover:bg-hover">Log In</button>
         </form>

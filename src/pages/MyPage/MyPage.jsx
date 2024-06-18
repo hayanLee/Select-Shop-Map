@@ -4,36 +4,30 @@ import ReviewsList from './ReviewsList.jsx';
 import supabase from '../../supabase/supabaseClient'; 
 
 const MyPage = () => {
-  // 임시 user 객체 (변경 예정!)
-  // const user = {
-  //   id: 'dummy-user-id',
-  //   nickname: '개돌이'
-  // };
-
   const [nickname, setNickname] = useState('');
   const [userId, setUserId] = useState('');
-  
 
   const fetchNickname = async () => {
     try {
-      const { data: user, error: userError } = await supabase.auth.getUser();
-      if (userError) {
-        throw userError;
+      const session = JSON.parse(localStorage.getItem('sb-qqfwyfugvnciounpkmfi-auth-token'));
+      if (!session || !session.user) {
+        console.error('No user info found in localStorage.');
+        return;
       }
 
-      if (user) {
-        const { data, error } = await supabase
-          .from('users') 
-          .select('nickname')
-          .eq('id', user.id)
-          .single();
+      const userId = session.user.id;
+      const { data, error } = await supabase
+        .from('users')
+        .select('nickname')
+        .eq('id', userId)
+        .single();
 
-        if (error) {
-          throw error;
-        }
-        setNickname(data.nickname);
-        setUserId(user.id);
+      if (error) {
+        throw error;
       }
+
+      setNickname(data.nickname);
+      setUserId(userId);
     } catch (error) {
       console.error('닉네임을 불러오는데에 실패했습니다.', error.message);
     }
