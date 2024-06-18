@@ -1,12 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = { nickname: 'test' };
+const initialState = { id: '', nickname: '' };
 const authSlice = createSlice({
   initialState,
   name: 'auth',
   reducers: {
-    setUserAuth: (state, action) => {},
-    clearUserAuth: (state) => {}
+    setUserAuth: (state, action) => {
+      const { id, nickname } = action.payload;
+      console.log('>>>>>>>>>>', id, nickname);
+      state.id = id;
+      state.nickname = nickname;
+    },
+    clearUserAuth: () => initialState
   }
 });
 

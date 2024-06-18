@@ -23,8 +23,8 @@ export const signUpWithEmail = async ({ email, password, nickname }) => {
 export const LoginWithEmail = async ({ email, password }) => {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password }); // 로그인 되면
   if (data) {
-    console.log(data);
     alert('로그인 성공하였습니다');
+    return await getUserInfo(data.user.id);
   }
   if (error) alert('로그인 실패하였습니다');
 };
@@ -47,13 +47,21 @@ export const getUser = async () => {
 };
 
 export const insertUserData = async (userInfo) => {
-  console.log(userInfo);
   const { id, email, nickname } = userInfo;
-  const { data, error } = await supabase.from('users').insert({
+  const { error } = await supabase.from('users').insert({
     id,
     created_at: new Date(),
     email,
     nickname
   });
   if (error) alert('회원 정보 저장 중 오류가 발생했습니다.');
+};
+
+export const getUserInfo = async (userId) => {
+  const { data } = await supabase.from('users').select('*').eq('id', userId);
+  if (data) {
+    const { id, nickname } = data[0];
+    return { id, nickname };
+  }
+  return null;
 };
