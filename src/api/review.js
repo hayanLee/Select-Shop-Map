@@ -1,5 +1,6 @@
 import supabase from '../supabase/supabaseClient';
 
+// 🔥
 export const addReview = async ({ userId, shopId, content }) => {
   try {
     const { error } = await supabase.from('reviews').insert({

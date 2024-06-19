@@ -36,33 +36,18 @@ const createMarker = (place, mapInstance, markersRef) => {
   markersRef.current.push(marker);
 };
 
-export const searchPlaces = (keyword, mapInstance, markersRef, setPlaces) => {
-  console.log('searchPlaces 호출');
-  // 장소 검색 객체 생성
+// 🔥 52~64 -> 마커찍는거라 분리
+// 나머지를 useQuery (Fn)
+export const searchPlaces = async (keyword) => {
   const ps = new window.kakao.maps.services.Places();
-
-  // 키워드 검색 (검색어, 검색 완료 시 실행할 콜백함수)
-  ps.keywordSearch(
-    keyword,
-    (data, status) => {
+  const promise = new Promise((resolve) => {
+    ps.keywordSearch(keyword, (data, status) => {
       if (status === window.kakao.maps.services.Status.OK) {
-        // 정상적으로 검색이 완료 되었으면
-
-        markersRef.current.forEach((marker) => marker.setMap(null)); // 기존에 저장된 마커 제거
-        markersRef.current = []; // 새로운 마커 저장을 위해 빈 배열 만듦
-
-        setPlaces(data); // 검색 결과를 Maps로 전달 (옆에 리스트로 보여주려고)
-
-        // 검색 된 결과를 기준으로 지도 범위 재설정
-        const bounds = new window.kakao.maps.LatLngBounds(); // 재설정할 범위를 가지고 있을 객체
-        data.forEach((place) => {
-          createMarker(place, mapInstance, markersRef); // 마커 생성
-          bounds.extend(new window.kakao.maps.LatLng(place.y, place.x)); // 위치 기억
-        });
-
-        mapInstance.setBounds(bounds); // 추가된 좌표들을 기준으로 지도 범위 재설정
+        resolve(data);
       }
-    }
-    // { page: 10 }
-  );
+    });
+  });
+  const places = await promise;
+
+  return places;
 };

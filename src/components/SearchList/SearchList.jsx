@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { useKakaoMap } from '../KakaoMap/KakaoMap.context';
 import PlaceCard from '../PlaceCard/PlaceCard';
 
-const SearchList = ({ places }) => {
-  useEffect(() => {
-    console.log('SearchList 마운트');
-  }, []);
+const SearchList = () => {
+  const { places } = useKakaoMap();
+
   return (
     <ul>
       {places.map((place) => (
