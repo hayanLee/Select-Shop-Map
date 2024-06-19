@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SavedShopsList from './SavedShopsList.jsx';
 import ReviewsList from './ReviewsList.jsx';
-import supabase from '../../supabase/supabaseClient'; 
+import {getUserInfo} from '../../api/auth';
 
 const MyPage = () => {
   const [nickname, setNickname] = useState('');
@@ -14,20 +14,16 @@ const MyPage = () => {
         console.error('No user info found in localStorage.');
         return;
       }
-
+  
       const userId = userInfo.id;
-      const { data, error } = await supabase
-        .from('users')
-        .select('nickname')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        throw error;
+      const user = await getUserInfo(userId); // getUserInfo 함수 호출
+  
+      if (user) {
+        setNickname(user.nickname);
+        setUserId(userId);
+      } else {
+        console.error('유저 정보를 불러오는데 실패했습니다.');
       }
-
-      setNickname(data.nickname);
-      setUserId(userId);
     } catch (error) {
       console.error('닉네임을 불러오는데에 실패했습니다.', error.message);
     }

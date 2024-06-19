@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { LuArrowRightToLine } from 'react-icons/lu';
-import { signOut } from '../../api/auth';
+import { signOut } from '../../api/auth'; // 경로에 주의하세요
 
 function Header() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  //localStorage에서 키 값을 가져와 사용자 정보 확인 후 user 상태 업데이트
-   useEffect(() => {
+  useEffect(() => {
     const checkUser = () => {
       const currentUser = JSON.parse(localStorage.getItem('sb-qqfwyfugvnciounpkmfi-auth-token'));
       if (currentUser && currentUser.user) {
@@ -19,13 +18,9 @@ function Header() {
       }
     };
 
-    // 컴포넌트가 마운트될 때 사용자 상태 확인
     checkUser();
-
-    // localStorage 변화를 감지하여 사용자 상태를 업데이트
     window.addEventListener('storage', checkUser);
 
-    // 컴포넌트가 언마운트될 때 이벤트 리스너 클린 업
     return () => {
       window.removeEventListener('storage', checkUser);
     };
@@ -33,8 +28,10 @@ function Header() {
 
   const handleLogout = async () => {
     await signOut();
-    localStorage.removeItem('sb-qqfwyfugvnciounpkmfi-auth-token');
+    localStorage.removeItem('userInfo'); // 로그아웃 시 사용자 정보 삭제
+    localStorage.removeItem('sb-qqfwyfugvnciounpkmfi-auth-token'); // 로그아웃 시 토큰 삭제
     setUser(null);
+    window.dispatchEvent(new Event('storage')); // 상태 변경을 트리거하여 다른 컴포넌트가 변경을 감지할 수 있게 함
     navigate('/');
   };
 
@@ -42,7 +39,7 @@ function Header() {
     <div className="flex h-20 w-full items-center justify-between bg-main px-96">
       <div className="flex items-center">
         <Link to={'/'}>
-          <img src="public/favicon.png" alt="logo" className="mr-3" style={{ height: '75px' }} />
+          <img src="/public/favicon.png" alt="logo" className="mr-3" style={{ height: '75px' }} />
         </Link>
         <p className="text-3xl font-bold text-blue-950">칠리칠리 소품랜드</p>
       </div>

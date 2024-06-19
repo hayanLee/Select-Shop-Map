@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { loginWithEmail } from '../../api/auth'; // 여기서 소문자로 시작하는 함수명을 임포트
+import { loginWithEmail } from '../../api/auth';
 import { Link, useNavigate } from 'react-router-dom';
 
 function LoginPage() {
@@ -7,13 +7,11 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  //컴포넌트 마운트 시 초기화
   useEffect(() => {
     localStorage.removeItem('savedEmail');
     localStorage.removeItem('savedPassword');
   }, []);
 
-  //컴포넌트 마운트 시 로컬 스토리지에서 값 불러오기
   useEffect(() => {
     const savedEmail = localStorage.getItem('savedEmail');
     const savedPassword = localStorage.getItem('savedPassword');
@@ -21,7 +19,6 @@ function LoginPage() {
     if (savedPassword) setPassword(savedPassword);
   }, []);
 
-  //유효성 검사
   const validateForm = () => {
     if (!email || !password) {
       alert('이메일과 비밀번호를 입력하세요.');
@@ -39,15 +36,15 @@ function LoginPage() {
     return true;
   };
 
-  //폼 제출 핸들러
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     try {
       const userInfo = await loginWithEmail({ email, password });
       if (userInfo) {
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
         localStorage.setItem('sb-qqfwyfugvnciounpkmfi-auth-token', JSON.stringify({ user: userInfo }));
-        window.dispatchEvent(new Event('storage')); // localStorage 변경 이벤트 트리거 -> 다른 컴포넌트에서도 상태 변경 감지 가능
+        window.dispatchEvent(new Event('storage'));
         navigate('/');
         setEmail('');
         setPassword('');
