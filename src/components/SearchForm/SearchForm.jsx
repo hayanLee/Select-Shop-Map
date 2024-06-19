@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { useKakaoMap } from '../KakaoMap/KakaoMap.context';
 
-const SearchForm = ({ onSearchKeyword }) => {
+const SearchForm = () => {
+  const { setSearchKeyword } = useKakaoMap();
   const [value, setValue] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearchKeyword(value);
+    setSearchKeyword(value);
   };
 
   const handleChange = (e) => setValue(e.target.value);
