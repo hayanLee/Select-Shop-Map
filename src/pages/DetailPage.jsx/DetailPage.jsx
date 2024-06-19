@@ -1,24 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
 
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
-  const storedUserInfo = localStorage.getItem('userInfo');
-  const userId = JSON.parse(storedUserInfo).id;
-
-  const location = useLocation();
+  const [userId, setUserId] = useState('');
   const { shopId } = useParams();
+  const location = useLocation();
+  const storedUserInfo = localStorage.getItem('userInfo');
+
   const { place_name: shop_name, road_address_name } = location.state;
+
   useEffect(() => {
-    (async () => {
-      const likedStatus = await isLikedShop({ userId, shopId });
-      setIsLiked(likedStatus);
-    })();
-  }, [userId, shopId]);
+    if (storedUserInfo) {
+      (async () => {
+        const { id } = JSON.parse(storedUserInfo);
+        setUserId(id);
+        const likedStatus = await isLikedShop({ userId: id, shopId });
+        setIsLiked(likedStatus);
+      })();
+    }
+  }, [storedUserInfo, shopId]);
 
   const handleLike = async () => {
+    if (!storedUserInfo) {
+      Swal.fire('Error', '해당 기능은 로그인 후 이용 가능합니다.', 'error');
+      return;
+    }
     if (isLiked) await deleteLike({ userId, shopId });
     else await addLike({ userId, shopId, shop_name });
 
@@ -39,11 +49,9 @@ const DetailPage = () => {
             <p className="mt-2 text-gray-700">{road_address_name}</p>
             <p className="mt-2 text-gray-700">위치</p>
             <p className="mt-2 text-gray-700">위치</p>
-            {/* {user === userId && ( */}
             <button onClick={handleLike} className="absolute bottom-4 right-4 text-3xl text-point">
               {isLiked ? <PiHeartFill /> : <PiHeart />}
             </button>
-            {/* )} */}
           </div>
         </div>
 
