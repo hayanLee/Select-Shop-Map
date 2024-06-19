@@ -22,7 +22,7 @@ export const signUpWithEmail = async ({ email, password, nickname }) => {
 //로그인 시도
 export const loginWithEmail = async ({ email, password }) => {
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password }); //🔥
     if (error) throw error;
     if (data && data.user) {
       alert('로그인에 성공하였습니다.');
