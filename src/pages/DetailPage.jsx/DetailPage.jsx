@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
-import { getUser } from '../../api/auth';
-
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
 
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
-  const [user, setUser] = useState('');
-  // const [userId, setUserId] = useState('');
-
   const storedUserInfo = localStorage.getItem('userInfo');
   const userId = JSON.parse(storedUserInfo).id;
-  const { shopId } = useParams();
 
+  const location = useLocation();
+  const { shopId } = useParams();
+  const { place_name: shop_name, road_address_name } = location.state;
   useEffect(() => {
     (async () => {
       const likedStatus = await isLikedShop({ userId, shopId });
@@ -23,19 +20,10 @@ const DetailPage = () => {
 
   const handleLike = async () => {
     if (isLiked) await deleteLike({ userId, shopId });
-    else await addLike({ userId, shopId });
+    else await addLike({ userId, shopId, shop_name });
 
     setIsLiked(!isLiked);
   };
-
-  useEffect(() => {
-    (async () => {
-      const test = await getUser();
-      setUser(test.id);
-      // console.log(user.id);
-      console.log(user);
-    })();
-  }, []);
 
   return (
     <div className="flex min-h-screen justify-center">
@@ -47,8 +35,8 @@ const DetailPage = () => {
             className="h-64 w-full rounded-lg bg-white object-cover shadow-md md:w-1/2"
           />
           <div className="relative flex w-full flex-col rounded-lg bg-white p-6 shadow-md md:w-1/2">
-            <h1 className="text-3xl font-bold">Title</h1>
-            <p className="mt-2 text-gray-700">위치</p>
+            <h1 className="text-3xl font-bold">{shop_name}</h1>
+            <p className="mt-2 text-gray-700">{road_address_name}</p>
             <p className="mt-2 text-gray-700">위치</p>
             <p className="mt-2 text-gray-700">위치</p>
             {/* {user === userId && ( */}

@@ -16,11 +16,12 @@ export const isLikedShop = async ({ userId, shopId }) => {
   }
 };
 
-export const addLike = async ({ userId, shopId }) => {
+export const addLike = async ({ userId, shopId, shop_name }) => {
   try {
     const { error } = await supabase.from('likes').insert({
       user_id: userId,
-      kakao_shop_id: shopId
+      kakao_shop_id: shopId,
+      shop_name
     });
 
     if (error) throw error;
