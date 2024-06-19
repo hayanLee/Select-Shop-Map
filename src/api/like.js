@@ -1,5 +1,6 @@
 import supabase from '../supabase/supabaseClient';
 
+// 🔥
 export const addLike = async (userId, shopId) => {
   try {
     const { error } = await supabase.from('likes').insert({

@@ -3,7 +3,7 @@ import DefaultLayout from '../layouts/DefaultLayout';
 import DetailPage from '../pages/DetailPage.jsx/DetailPage';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
-import MyPage from '../pages/MyPage';
+import MyPage from '../pages/MyPage/MyPage.jsx'; 
 import SearchPage from '../pages/SearchPage';
 import SignUpPage from '../pages/SignUpPage';
 
