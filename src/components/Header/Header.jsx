@@ -1,42 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { LuArrowRightToLine } from 'react-icons/lu';
+import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from '../../api/auth';
 
 function Header() {
-  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkUser = () => {
-      const storedUserInfo = localStorage.getItem('userInfo');
-      if (storedUserInfo) {
-        const currentUser = JSON.parse(storedUserInfo);
-        if (currentUser) {
-          setUser(currentUser);
-        } else {
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    };
-
-    checkUser();
-    window.addEventListener('storage', checkUser);
-
-    return () => {
-      window.removeEventListener('storage', checkUser);
-    };
-  }, []);
+  const storedUserInfo = localStorage.getItem('userInfo');
 
   const handleLogout = async () => {
     await signOut();
-    localStorage.removeItem('userInfo'); // 로그아웃 시 사용자 정보 삭제
-    localStorage.removeItem('sb-qqfwyfugvnciounpkmfi-auth-token'); // 로그아웃 시 토큰 삭제
-    setUser(null);
-    window.dispatchEvent(new Event('storage')); // 상태 변경을 트리거하여 다른 컴포넌트가 변경을 감지할 수 있게 함
     navigate('/');
   };
 
@@ -56,7 +29,7 @@ function Header() {
             className="h-10 w-80 rounded-3xl pl-10 pr-4 focus:outline-active"
           />
         </div>
-        {user ? (
+        {storedUserInfo ? (
           <div className="flex items-center">
             <Link to="/mypage" className="ml-4 text-blue-950">
               <p className="text-xl font-bold">My Page</p>

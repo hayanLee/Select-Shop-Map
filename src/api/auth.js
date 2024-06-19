@@ -41,17 +41,15 @@ export const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     alert('로그아웃 되었습니다.');
+    localStorage.removeItem('userInfo'); // 로그아웃 시 사용자 정보 삭제
 
     // 로컬 스토리지에서 사용자 정보 삭제
     localStorage.removeItem('userInfo');
-    localStorage.removeItem('sb-qqfwyfugvnciounpkmfi-auth-token');
-    window.dispatchEvent(new Event('storage')); // 상태 변경을 트리거하여 다른 컴포넌트가 변경을 감지할 수 있게 함
   } catch (error) {
     console.error('로그아웃 중 오류가 발생했습니다:', error.message);
     alert('로그아웃 중 오류가 발생했습니다.');
   }
 };
-
 
 //로그인 한 사용자 정보 가져오기
 export const getUser = async () => {
@@ -99,4 +97,16 @@ export const getUserInfo = async (userId) => {
     alert('유저 정보 조회 중 오류가 발생하였습니다.');
   }
   return null;
+};
+
+export const isEmailRegistered = async ({ email }) => {
+  const { data, error } = await supabase.from('users').select('*').eq('email', email);
+  if (error) throw error;
+
+  if (data.length > 0) {
+    alert('이미 가입된 이메일입니다.');
+    return false;
+  } else {
+    return true;
+  }
 };
