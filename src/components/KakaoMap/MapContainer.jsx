@@ -1,100 +1,42 @@
 import React, { useEffect, useRef } from 'react';
+import { initializeMap } from '../../api/kakao/initializeMap';
+import { searchPlaces } from '../../api/kakao/searchPlaces';
+
+// 컴포넌트 자체 (지도 로드 + 검색)
+
+const loadMap = async (keyword, mapRef, markersRef, setPlaces, mapContainerId) => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude; // 위도
+        const lon = position.coords.longitude; // 경도
+
+        if (!mapRef.current) {
+          const mapInstance = await initializeMap(lat, lon, mapContainerId, mapRef); // 지도 초기화
+          await searchPlaces(keyword, mapInstance, markersRef, setPlaces); // 장소 검색
+        } else {
+          await searchPlaces(keyword, mapRef.current, markersRef, setPlaces);
+        }
+      },
+      (error) => {
+        console.error('위치 검색 에러:', error);
+      }
+    );
+  } else {
+    console.error('Geolocation is not supported by this browser.');
+  }
+};
 
 const MapContainer = ({ keyword, setPlaces, mapContainerId }) => {
-  const mapRef = useRef(null);
+  const mapRef = useRef(null); // 현재 지도 객체
   const markersRef = useRef([]);
 
-  const initializeMap = (lat, lon) => {
-    const container = document.getElementById(mapContainerId);
-    if (container) {
-      const options = {
-        center: new window.kakao.maps.LatLng(lat, lon),
-        level: 10,
-      };
-      const mapInstance = new window.kakao.maps.Map(container, options);
-      mapRef.current = mapInstance;
-
-      new window.kakao.maps.Marker({
-        map: mapInstance,
-        position: new window.kakao.maps.LatLng(lat, lon),
-      });
-
-      return mapInstance;
-    } else {
-      console.error(`Element with id ${mapContainerId} not found`);
-    }
-  };
-
-  const searchPlaces = (keyword, mapInstance) => {
-    const ps = new window.kakao.maps.services.Places();
-    ps.keywordSearch(keyword, (data, status) => {
-      if (status === window.kakao.maps.services.Status.OK) {
-        markersRef.current.forEach((marker) => marker.setMap(null));
-        markersRef.current = [];
-
-        setPlaces(data);
-
-        data.forEach((place) => {
-          const marker = new window.kakao.maps.Marker({
-            map: mapInstance,
-            position: new window.kakao.maps.LatLng(place.y, place.x),
-          });
-
-          const getImageUrl = (placeId) => {
-            return `https://place.map.kakao.com/main/v/${placeId}`;
-          };
-
-          const content = `
-            <div style="padding:5px;font-size:12px;">
-              <strong>${place.place_name}</strong><br>
-              <img src="${getImageUrl(place.id)}" style="width:100px;height:100px;"><br>
-              ${place.road_address_name || place.address_name}<br>
-              전화번호: ${place.phone}<br>
-              <a href="${place.place_url}" target="_blank">상세정보</a>
-            </div>
-          `;
-          const infowindow = new window.kakao.maps.InfoWindow({
-            content: content,
-          });
-
-          window.kakao.maps.event.addListener(marker, 'click', () => {
-            infowindow.open(mapInstance, marker);
-          });
-
-          markersRef.current.push(marker);
-        });
-      }
-    });
-  };
-
-  const loadMap = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-
-          if (!mapRef.current) {
-            const mapInstance = initializeMap(lat, lon);
-            searchPlaces(keyword, mapInstance);
-          } else {
-            searchPlaces(keyword, mapRef.current);
-          }
-        },
-        (error) => {
-          console.error('Error occurred while retrieving location:', error);
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-    }
-  };
-
+  // 키워드가 변경되면 로드맵
   useEffect(() => {
-    loadMap();
+    (async () => await loadMap(keyword, mapRef, markersRef, setPlaces, mapContainerId))();
   }, [keyword]);
 
-  return <div id={mapContainerId} className="flex-1 h-full"></div>;
+  return <div id={mapContainerId} className="h-full flex-1"></div>;
 };
 
 export default MapContainer;
