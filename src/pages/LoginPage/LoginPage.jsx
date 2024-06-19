@@ -1,31 +1,31 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginWithEmail } from '../../api/auth';
+import { useLogin } from '../../api/hooks';
 import { validateForm } from '../../utils/validateForm';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const mutation = useLogin();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm({ email, password })) return;
 
-    try {
-      const userInfo = await loginWithEmail({ email, password });
-      if (userInfo) {
-        localStorage.setItem('userInfo', JSON.stringify(userInfo)); // 로컬스토리지에 저장
-
+    mutation.mutate({ email, password }, {
+      onSuccess: (userInfo) => {
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+        localStorage.setItem('sb-qqfwyfugvnciounpkmfi-auth-token', JSON.stringify({ user: userInfo }));
+        window.dispatchEvent(new Event('storage'));
+        navigate('/');
         setEmail('');
         setPassword('');
-        navigate('/');
-      } else {
-        console.error('로그인 후 사용자 정보를 받아오지 못했습니다.');
+      },
+      onError: (error) => {
+        console.error('로그인 실패:', error.message);
       }
-    } catch (error) {
-      console.error('로그인 실패:', error.message);
-    }
+    });
   };
 
   return (
