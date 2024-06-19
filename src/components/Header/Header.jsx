@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { LuArrowRightToLine } from 'react-icons/lu';
-import { signOut } from '../../api/auth'; // 경로에 주의하세요
+import { signOut } from '../../api/auth';
 
 function Header() {
   const [user, setUser] = useState(null);
@@ -10,9 +10,14 @@ function Header() {
 
   useEffect(() => {
     const checkUser = () => {
-      const currentUser = JSON.parse(localStorage.getItem('sb-qqfwyfugvnciounpkmfi-auth-token'));
-      if (currentUser && currentUser.user) {
-        setUser(currentUser.user);
+      const storedUserInfo = localStorage.getItem('userInfo');
+      if (storedUserInfo) {
+        const currentUser = JSON.parse(storedUserInfo);
+        if (currentUser) {
+          setUser(currentUser);
+        } else {
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
@@ -39,7 +44,7 @@ function Header() {
     <div className="flex h-20 w-full items-center justify-between bg-main px-96">
       <div className="flex items-center">
         <Link to={'/'}>
-          <img src="/public/favicon.png" alt="logo" className="mr-3" style={{ height: '75px' }} />
+          <img src="/favicon.png" alt="logo" className="mr-3" style={{ height: '75px' }} />
         </Link>
         <p className="text-3xl font-bold text-blue-950">칠리칠리 소품랜드</p>
       </div>

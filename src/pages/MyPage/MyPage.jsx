@@ -14,10 +14,10 @@ const MyPage = () => {
         console.error('No user info found in localStorage.');
         return;
       }
-  
+
       const userId = userInfo.id;
       const user = await getUserInfo(userId); // getUserInfo 함수 호출
-  
+
       if (user) {
         setNickname(user.nickname);
         setUserId(userId);
