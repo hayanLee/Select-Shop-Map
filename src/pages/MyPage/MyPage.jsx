@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SavedShopsList from './SavedShopsList.jsx';
 import ReviewsList from './ReviewsList.jsx';
-import supabase from '../../supabase/supabaseClient'; 
+import { getUserInfo } from '../../api/auth';
 
 const MyPage = () => {
   const [nickname, setNickname] = useState('');
@@ -16,18 +16,14 @@ const MyPage = () => {
       }
 
       const userId = userInfo.id;
-      const { data, error } = await supabase
-        .from('users')
-        .select('nickname')
-        .eq('id', userId)
-        .single();
+      const user = await getUserInfo(userId); // getUserInfo 함수 호출
 
-      if (error) {
-        throw error;
+      if (user) {
+        setNickname(user.nickname);
+        setUserId(userId);
+      } else {
+        console.error('유저 정보를 불러오는데 실패했습니다.');
       }
-
-      setNickname(data.nickname);
-      setUserId(userId);
     } catch (error) {
       console.error('닉네임을 불러오는데에 실패했습니다.', error.message);
     }
@@ -38,22 +34,24 @@ const MyPage = () => {
   }, []);
 
   return (
-    <div className="container bg-[#E5E1EF] mx-auto p-4 rounded shadow">
-      <h1 className="text-3xl font-bold mb-4">💜{nickname || 'Loading...'}💜</h1>
-      <div className="my-4">
-        <h2 className="text-xl font-semibold mb-2">
-         닉네임 💜{nickname || 'Loading...'}💜님의 찜 목록
-        </h2>
-        <div className="p-4 bg-gray-100 rounded shadow">
-          <SavedShopsList userId={userId} /> 
+    <div className="w-full min-h-screen flex flex-col items-center"> 
+      <div className="container bg-[#E5E1EF] p-4 rounded shadow mt-16 mb-20 w-3/4"> 
+        <h1 className="text-3xl font-bold mb-10">💜{nickname || 'Loading...'}💜</h1>
+        <div className="my-4">
+          <h2 className="text-xl font-semibold mb-4">
+            닉네임 💜{nickname || 'Loading...'}💜님의 찜 목록
+          </h2>
+          <div className="p-4 bg-gray-100 rounded shadow min-h-40 mb-8"> 
+            <SavedShopsList userId={userId} /> 
+          </div>
         </div>
-      </div>
-      <div className="my-4">
-        <h2 className="text-xl font-semibold mb-2">
-          닉네임 💜{nickname || 'Loading...'}💜님이 작성한 리뷰
-        </h2>
-        <div className="p-4 bg-gray-100 rounded shadow">
-          <ReviewsList userId={userId} />
+        <div className="my-4">
+          <h2 className="text-xl font-semibold mb-4">
+            닉네임 💜{nickname || 'Loading...'}💜님이 작성한 리뷰
+          </h2>
+          <div className="p-4 bg-gray-100 rounded shadow min-h-40 mb-4">
+            <ReviewsList userId={userId} />
+          </div>
         </div>
       </div>
     </div>
