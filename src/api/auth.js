@@ -7,66 +7,59 @@ export const signUpWithEmail = async ({ email, password, nickname }) => {
       password
     });
 
-    //에러 메세지 출력
-    if (error) {
-      if (error.code === 'weak_password') alert('비밀번호는 6자리 이상이어야 합니다.');
-      else alert('회원가입 중 오류가 발생했습니다.');
-      return;
-    }
-
-    //회원가입 성공 시 실행. 사용자 데이터를 db에 저장
+    if (error) throw error;
     if (data.user) {
       const { id, email } = data.user;
       await insertUserData({ id, email, nickname });
       alert('회원가입에 성공하였습니다!');
     }
   } catch (error) {
-    console.error('회원가입 중 오류가 발생했습니다:', error);
+    console.error('회원가입 중 오류가 발생했습니다:', error.message);
+    alert('회원가입 중 오류가 발생했습니다.');
   }
 };
 
 //로그인 시도
 export const loginWithEmail = async ({ email, password }) => {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-  //에러 메세지 출력
-  if (error) {
-    alert('로그인에 실패하였습니다.');
-    console.error('로그인 오류:', error);
-    return null;
-  }
-
-  //로그인 성공 시 사용자 정보 가져오기
-  if (data && data.user) {
-    alert('로그인에 성공하였습니다.');
-    const userInfo = await getUserInfo(data.user.id);
-    if (userInfo) {
-      return userInfo;
-    } else {
-      console.error('사용자 정보를 가져오지 못했습니다.');
-      return null;
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    if (data && data.user) {
+      alert('로그인에 성공하였습니다.');
+      return await getUserInfo(data.user.id);
     }
+  } catch (error) {
+    console.error('로그인 중 오류가 발생하였습니다:', error.message);
+    alert('로그인 중 오류가 발생하였습니다.');
   }
   return null;
 };
 
 //로그아웃
 export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  alert('로그아웃 되었습니다.');
-  if (error) alert('로그아웃에 실패하였습니다.');
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    alert('로그아웃 되었습니다.');
+  } catch (error) {
+    console.error('로그아웃 중 오류가 발생했습니다:', error.message);
+    alert('로그아웃 중 오류가 발생했습니다.');
+  }
 };
 
 //로그인 한 사용자 정보 가져오기
 export const getUser = async () => {
-  const { data, error } = await supabase.auth.getUser();
-  if (data.user) {
-    console.log(data.user);
-    return data.user;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+    if (data.user) {
+      return data.user;
+    }
+  } catch (error) {
+    console.error('로그인한 유저를 찾을 수 없습니다:', error.message);
+    alert('로그인한 유저를 찾을 수 없습니다.');
   }
-  if (error) {
-    console.log('로그인한 유저가 없습니다', error);
-  }
+  return null;
 };
 
 //db테이블에 사용자 데이터 삽입
@@ -81,17 +74,23 @@ export const insertUserData = async (userInfo) => {
     });
     if (error) throw error;
   } catch (error) {
+    console.error('회원 정보 저장 중 오류가 발생했습니다:', error.message);
     alert('회원 정보 저장 중 오류가 발생했습니다.');
-    console.error('회원 정보 저장 중 오류가 발생했습니다:', error);
   }
 };
 
 //특정 사용자의 추가 정보 가져오기
 export const getUserInfo = async (userId) => {
-  const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
-  if (error) {
-    console.error('사용자 정보를 가져오는 중 오류 발생:', error.message);
-    return null;
+  try {
+    const { data, error } = await supabase.from('users').select('*').eq('id', userId);
+    if (error) throw error;
+    if (data && data.length > 0) {
+      const { id, nickname } = data[0];
+      return { id, nickname };
+    }
+  } catch (error) {
+    console.error('유저 정보 조회 중 오류가 발생하였습니다:', error.message);
+    alert('유저 정보 조회 중 오류가 발생하였습니다.');
   }
-  return data;
+  return null;
 };
