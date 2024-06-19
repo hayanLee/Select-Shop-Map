@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
+import { getUser } from '../../api/auth';
 
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
+  const [user, setUser] = useState('');
+  // const [userId, setUserId] = useState('');
 
   const handleLike = () => {
     setIsLiked(!isLiked);
   };
+
+  useEffect(() => {
+    (async () => {
+      const test = await getUser();
+      setUser(test.id);
+      // console.log(user.id);
+      console.log(user);
+    })();
+  }, []);
 
   return (
     <div className="flex min-h-screen justify-center">
@@ -22,9 +34,11 @@ const DetailPage = () => {
             <p className="mt-2 text-gray-700">위치</p>
             <p className="mt-2 text-gray-700">위치</p>
             <p className="mt-2 text-gray-700">위치</p>
+            {/* {user === userId && ( */}
             <button onClick={handleLike} className="absolute bottom-4 right-4 text-3xl text-point">
               {isLiked ? <PiHeartFill /> : <PiHeart />}
             </button>
+            {/* )} */}
           </div>
         </div>
 
