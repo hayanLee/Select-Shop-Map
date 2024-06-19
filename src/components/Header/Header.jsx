@@ -14,12 +14,12 @@ function Header() {
   };
 
   return (
-    <div className="flex h-20 w-full items-center justify-between bg-main px-96">
+    <div className="flex h-20 w-full items-center justify-between overflow-hidden bg-main sm:px-11 xl:px-64">
       <div className="flex items-center">
         <Link to={'/'}>
-          <img src="/favicon.png" alt="logo" className="mr-3" style={{ height: '75px' }} />
+          <img src="/favicon.png" alt="logo" className="mr-1" style={{ height: '60px', minWidth: '60px' }} />
         </Link>
-        <p className="text-3xl font-bold text-blue-950">칠리칠리 소품랜드</p>
+        <p className="min-w-10 text-2xl font-bold text-blue-950">칠리칠리 소품랜드</p>
       </div>
       <div className="flex items-center">
         <div className="relative">
