@@ -19,7 +19,7 @@ export function KakaoMapProvider({ children }) {
   const { data: places = [], isSuccess } = useQuery({
     queryKey: ['places', { searchKeyword }],
     queryFn: () => searchPlaces(searchKeyword),
-    enabled: isMapLoaded,
+    enabled: isMapLoaded
   });
 
   useEffect(() => {
@@ -38,14 +38,14 @@ export function KakaoMapProvider({ children }) {
         const { lat, lon } = await getCurrentPosition();
         const options = {
           center: new window.kakao.maps.LatLng(lat, lon),
-          level: 5,
+          level: 5
         };
         const mapInstance = new window.kakao.maps.Map(mapContainerElRef.current, options);
         setKakaoMapInstance(mapInstance);
 
         const currentMarker = new window.kakao.maps.Marker({
           map: mapInstance,
-          position: options.center,
+          position: options.center
         });
 
         window.kakao.maps.event.addListener(currentMarker, 'click', () => {
@@ -66,7 +66,7 @@ export function KakaoMapProvider({ children }) {
         const marker = new window.kakao.maps.Marker({
           map: mapInstance,
           position: markerPosition,
-          title: place.place_name,
+          title: place.place_name
         });
 
         const content = `
@@ -82,7 +82,7 @@ export function KakaoMapProvider({ children }) {
         const infowindow = new window.kakao.maps.InfoWindow({
           content: content,
           removable: true,
-          zIndex: 1,
+          zIndex: 1
         });
 
         const handleMarkerClick = () => {
@@ -122,7 +122,7 @@ export function KakaoMapProvider({ children }) {
     setSearchKeyword,
     mapInstance,
     places,
-    mapContainerElRef,
+    mapContainerElRef
   };
 
   return (
@@ -161,7 +161,7 @@ async function getCurrentPosition() {
         (position) => {
           resolve({
             lat: position.coords.latitude,
-            lon: position.coords.longitude,
+            lon: position.coords.longitude
           });
         },
         (error) => reject(error)

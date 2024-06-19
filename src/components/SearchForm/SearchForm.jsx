@@ -7,7 +7,8 @@ const SearchForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSearchKeyword(value);
+    const formattedValue = value.trim().replace(/\s+/g, ' ') + ' 소품샵';
+    setSearchKeyword(formattedValue);
   };
 
   const handleChange = (e) => setValue(e.target.value);
@@ -17,7 +18,7 @@ const SearchForm = () => {
       <input
         type="text"
         name="keyword"
-        placeholder="지역을 입력하세요"
+        placeholder="검색할 지역을 입력해주세요"
         value={value}
         onChange={handleChange}
         className="mb-2 w-full rounded border border-gray-300 p-2"
