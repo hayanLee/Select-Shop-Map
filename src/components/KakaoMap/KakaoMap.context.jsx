@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { searchPlaces } from '../../api/kakao/searchPlaces';
+import Marker from '../Marker/Marker';
 
 const KakaoMapContext = createContext();
 
@@ -12,10 +13,13 @@ export function KakaoMapProvider({ children }) {
   const [searchKeyword, setSearchKeyword] = useState('홍대 소품샵');
   const [mapInstance, setKakaoMapInstance] = useState(null);
   const mapContainerElRef = useRef(null);
+  const markersRef = useRef([]);
+  const infoWindowsRef = useRef([]);
 
-  const { data: places = [] } = useQuery({
+  const { data: places = [], isSuccess } = useQuery({
     queryKey: ['places', { searchKeyword }],
-    queryFn: () => searchPlaces(searchKeyword)
+    queryFn: () => searchPlaces(searchKeyword),
+    enabled: isMapLoaded,
   });
 
   useEffect(() => {
@@ -29,74 +33,143 @@ export function KakaoMapProvider({ children }) {
   }, [isSDKLoaded]);
 
   useEffect(() => {
-    (async () => {
+    const initializeMap = async () => {
       if (isMapLoaded && mapContainerElRef.current) {
         const { lat, lon } = await getCurrentPosition();
-
         const options = {
           center: new window.kakao.maps.LatLng(lat, lon),
-          level: 5
+          level: 5,
         };
-        const mapInstance = new window.kakao.maps.Map(mapContainerElRef.current, options); // 지도 생성
-        setKakaoMapInstance(mapInstance); // 현재 지도 객체
+        const mapInstance = new window.kakao.maps.Map(mapContainerElRef.current, options);
+        setKakaoMapInstance(mapInstance);
 
-        // // 현재 위치로 핑 찍기 🔥
-        // new window.kakao.maps.Marker({
-        //   map: mapInstance,
-        //   position: options.center
-        // });
+        const currentMarker = new window.kakao.maps.Marker({
+          map: mapInstance,
+          position: options.center,
+        });
+
+        window.kakao.maps.event.addListener(currentMarker, 'click', () => {
+          console.log('Current location marker clicked!');
+        });
       }
-    })();
+    };
+
+    initializeMap();
   }, [isMapLoaded]);
+
+  useEffect(() => {
+    if (mapInstance && places.length) {
+      clearMarkers();
+      const bounds = new window.kakao.maps.LatLngBounds();
+      places.forEach((place) => {
+        const markerPosition = new window.kakao.maps.LatLng(place.y, place.x);
+        const marker = new window.kakao.maps.Marker({
+          map: mapInstance,
+          position: markerPosition,
+          title: place.place_name,
+        });
+
+        const content = `
+          <div style="padding:16px; background-color:white; border:1px solid #d1d5db; border-radius:12px; max-width:400px; box-shadow:0 4px 6px rgba(0, 0, 0, 0.1);">
+            <h4 style="font-weight:bold; font-size:1.125rem; margin-bottom:8px;">${place.place_name}</h4>
+            <img src="path/to/your/image.jpg" alt="${place.place_name}" style="margin-bottom:8px; width:100%; height:128px; object-fit:cover; border-radius:8px;"/>
+            <p style="font-size:0.875rem; color:#6b7280;">${place.road_address_name || place.address_name}</p>
+            <p style="font-size:0.875rem; color:#6b7280;">${place.phone ? '☎️: ' + place.phone : '전화번호 정보 없음'}</p>
+            <a href="${place.place_url}" target="_blank" style="color:#3b82f6; text-decoration:underline; margin-top:8px; display:block;">상세정보</a>
+          </div>
+        `;
+
+        const infowindow = new window.kakao.maps.InfoWindow({
+          content: content,
+          removable: true,
+          zIndex: 1,
+        });
+
+        const handleMarkerClick = () => {
+          infoWindowsRef.current.forEach((iw) => iw.close());
+          infowindow.open(mapInstance, marker);
+
+          // 인포윈도우의 기본 스타일을 직접 제거
+          const iwElement = infowindow.a;
+          if (iwElement) {
+            iwElement.style.border = 'none';
+            iwElement.style.background = 'none';
+            iwElement.style.boxShadow = 'none';
+          }
+        };
+
+        window.kakao.maps.event.addListener(marker, 'click', handleMarkerClick);
+
+        markersRef.current.push(marker);
+        infoWindowsRef.current.push(infowindow);
+
+        bounds.extend(markerPosition);
+      });
+
+      mapInstance.setBounds(bounds);
+    }
+  }, [mapInstance, places]);
+
+  const clearMarkers = () => {
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
+    infoWindowsRef.current.forEach((infowindow) => infowindow.close());
+    infoWindowsRef.current = [];
+  };
 
   const value = {
     searchKeyword,
     setSearchKeyword,
     mapInstance,
     places,
-    mapContainerElRef
+    mapContainerElRef,
   };
 
-  return <KakaoMapContext.Provider value={value}>{children}</KakaoMapContext.Provider>;
+  return (
+    <KakaoMapContext.Provider value={value}>
+      {children}
+      {isSuccess &&
+        mapInstance &&
+        places.map((place) => (
+          <Marker
+            key={place.id}
+            place={place}
+            mapInstance={mapInstance}
+            markersRef={markersRef}
+            infoWindowsRef={infoWindowsRef}
+          />
+        ))}
+    </KakaoMapContext.Provider>
+  );
 }
 
 function loadKakaoMapSDK(onLoadCallback) {
   const script = document.createElement('script');
   script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=cb8906a483c5671f6f94b58a926ef09c&autoload=false&libraries=services`;
   script.async = true;
-  document.head.appendChild(script);
-
-  // 스크립트 로드 성공
   script.onload = onLoadCallback;
-
-  // 스크립트 로드 실패
   script.onerror = () => {
     console.error('Failed to load Kakao Maps API script');
   };
+  document.head.appendChild(script);
 }
 
 async function getCurrentPosition() {
-  const promise = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const lat = position.coords.latitude; // 위도
-          const lon = position.coords.longitude; // 경도
-
-          resolve({ lat, lon });
+          resolve({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
         },
-        (error) => {
-          reject(error);
-        }
+        (error) => reject(error)
       );
     } else {
       reject(new Error('Geolocation is not supported by this browser.'));
     }
   });
-
-  const currentPosition = await promise;
-
-  return currentPosition;
 }
 
 // 컴포넌트 자체 (지도 로드 + 검색)
