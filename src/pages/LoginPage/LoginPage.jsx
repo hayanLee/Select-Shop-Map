@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LoginWithEmail } from '../../api/auth';
+import { loginWithEmail } from '../../api/auth'; // 여기서 소문자로 시작하는 함수명을 임포트
 import { Link, useNavigate } from 'react-router-dom';
 
 function LoginPage() {
@@ -44,7 +44,7 @@ function LoginPage() {
     e.preventDefault();
     if (!validateForm()) return;
     try {
-      const userInfo = await LoginWithEmail({ email, password });
+      const userInfo = await loginWithEmail({ email, password });
       if (userInfo) {
         localStorage.setItem('sb-qqfwyfugvnciounpkmfi-auth-token', JSON.stringify({ user: userInfo }));
         window.dispatchEvent(new Event('storage')); // localStorage 변경 이벤트 트리거 -> 다른 컴포넌트에서도 상태 변경 감지 가능
