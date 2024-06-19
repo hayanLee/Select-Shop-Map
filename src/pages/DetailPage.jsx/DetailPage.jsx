@@ -2,12 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { getUser } from '../../api/auth';
 
+import { useParams } from 'react-router-dom';
+import { addLike, deleteLike, isLikedShop } from '../../api/like';
+
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [user, setUser] = useState('');
   // const [userId, setUserId] = useState('');
 
-  const handleLike = () => {
+  const storedUserInfo = localStorage.getItem('userInfo');
+  const userId = JSON.parse(storedUserInfo).id;
+  const { shopId } = useParams();
+
+  useEffect(() => {
+    (async () => {
+      const likedStatus = await isLikedShop({ userId, shopId });
+      setIsLiked(likedStatus);
+    })();
+  }, [userId, shopId]);
+
+  const handleLike = async () => {
+    if (isLiked) await deleteLike({ userId, shopId });
+    else await addLike({ userId, shopId });
+
     setIsLiked(!isLiked);
   };
 
