@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import supabase from '../../supabase/supabaseClient';
+import { getUserReviewsByUserId } from '../../api/review';
 
 const ReviewsList = ({ userId }) => {
   const [reviews, setReviews] = useState([]);
@@ -8,14 +8,7 @@ const ReviewsList = ({ userId }) => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const { data, error } = await supabase
-          .from('reviews')
-          .select('id, content, created_at')
-          .eq('user_id', userId);
-
-        if (error) {
-          throw error;
-        }
+        const data = await getUserReviewsByUserId(userId); // API 함수 호출
 
         setReviews(data);
       } catch (error) {
