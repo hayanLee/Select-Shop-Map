@@ -3,7 +3,7 @@ import Header from '../components/Header';
 
 function DefaultLayout() {
   return (
-    <div className="w-scree h-screen">
+    <div className="font-NexonGothic h-screen w-full">
       <Header />
       <div className="h-full sm:px-11 xl:px-64">
         <Outlet />
