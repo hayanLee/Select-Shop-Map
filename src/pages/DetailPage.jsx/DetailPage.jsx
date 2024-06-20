@@ -68,7 +68,10 @@ const DetailPage = () => {
         <div className="mt-6 rounded-lg bg-hover p-[48px_36px_30px_36px] shadow-md">
           <section className="rounded-lg bg-white p-4 shadow-md">
             <div className="flex items-center space-x-[22px]">
-              <textarea placeholder="리뷰를 남겨주세요" className="h-[70px] w-full resize-none rounded-lg border p-2" />
+              <textarea
+                placeholder="리뷰를 남겨주세요"
+                className="h-[70px] w-full resize-none rounded-lg border p-2 focus:outline-active"
+              />
               <button className="h-[35px] w-[76px] rounded-lg bg-point text-white">등록</button>
             </div>
           </section>
