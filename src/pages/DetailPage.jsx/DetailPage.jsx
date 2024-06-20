@@ -3,7 +3,7 @@ import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
-
+import mainIcon from '../../assets/mainIcon.png';
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [userId, setUserId] = useState('');
@@ -39,11 +39,7 @@ const DetailPage = () => {
     <div className="flex min-h-screen justify-center">
       <main className="w-full max-w-[1320px] p-4">
         <div className="mt-[20px] flex flex-col gap-6 rounded-lg bg-hover p-[48px_36px_30px_36px] shadow-lg md:flex-row">
-          <img
-            // src={require('../assets/image.jpg')} // 실제 이미지 경로로 변경
-            alt="Store"
-            className="h-64 w-full rounded-lg bg-white object-cover shadow-md md:w-1/2"
-          />
+          <img src={mainIcon} alt="Store" className="h-64 w-full rounded-lg bg-white object-cover shadow-md md:w-1/2" />
           <div className="relative flex w-full flex-col rounded-lg bg-white p-6 shadow-md md:w-1/2">
             <h1 className="text-3xl font-bold">{shop_name}</h1>
             <p className="mt-2 text-gray-700">{road_address_name}</p>
