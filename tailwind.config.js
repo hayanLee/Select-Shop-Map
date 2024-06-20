@@ -13,7 +13,8 @@ export default {
       },
       gridTemplateColumns: {
         main: 'minmax(400px, 0.5fr) 2fr'
-      }
+      },
+      fontFamily: { NexonGothic: ['NexonGothic'] }
     }
   },
   plugins: []
