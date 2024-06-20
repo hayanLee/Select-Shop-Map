@@ -1,7 +1,7 @@
 import { LuArrowRightToLine } from 'react-icons/lu';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from '../../api/auth';
-
+import mainIcon from '../../assets/mainIcon.png';
 function Header() {
   const navigate = useNavigate();
 
@@ -17,7 +17,7 @@ function Header() {
       <div className="mx-auto flex h-16 w-full max-w-screen-xl items-center justify-between px-4 md:px-12">
         <div className="flex items-center">
           <Link to={'/'}>
-            <img src="src\assets\mainIcon.png" alt="logo" className="mr-2" style={{ height: '50px' }} />
+            <img src={mainIcon} alt="logo" className="mr-2" style={{ height: '50px' }} />
           </Link>
           <p className="text-xl font-bold text-blue-950">칠리칠리 소품랜드</p>
         </div>
