@@ -4,7 +4,7 @@ import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
-import { getShopReviewsByShopId, addReview, modifyReview, deleteReview } from '../../api/review';
+import { addReview, deleteReview, getShopReviewsByShopId, modifyReview } from '../../api/review';
 import mainIcon from '../../assets/mainIcon.png';
 
 const DetailPage = () => {
@@ -44,7 +44,7 @@ const DetailPage = () => {
     onSuccess: () => setIsLiked(false)
   });
 
-  const { data: reviews, refetch } = useQuery({
+  const { data: reviews } = useQuery({
     queryKey: ['reviews', shopId],
     queryFn: () => getShopReviewsByShopId(shopId),
     enabled: !!shopId
@@ -78,7 +78,11 @@ const DetailPage = () => {
   };
 
   const handleAddReview = async () => {
-    if (!newReview.trim()) return;
+
+    if (!newReview.trim()) {
+      Swal.fire('Error', '입력 후 등록해주세요.', 'error');
+      return;
+    }
     await addReviewMutation.mutateAsync({ userId, shopId, content: newReview });
   };
 
@@ -126,20 +130,22 @@ const DetailPage = () => {
                     <p className="font-bold">{review.user_name}</p>
                     <p>{review.content}</p>
                   </div>
-                  <div className="flex space-x-[22px]">
-                    <button
-                      onClick={() => handleUpdateReview(review.id, prompt('리뷰를 수정하세요:', review.content))}
-                      className="h-[35px] w-[76px] rounded-lg bg-point text-white"
-                    >
-                      수정
-                    </button>
-                    <button
-                      onClick={() => handleDeleteReview(review.id)}
-                      className="h-[35px] w-[76px] rounded-lg bg-main text-white"
-                    >
-                      삭제
-                    </button>
-                  </div>
+                  {userId === review.user_id && (
+                    <div className="flex space-x-[22px]">
+                      <button
+                        onClick={() => handleUpdateReview(review.id, prompt('리뷰를 수정하세요:', review.content))}
+                        className="h-[35px] w-[76px] rounded-lg bg-point text-white"
+                      >
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleDeleteReview(review.id)}
+                        className="h-[35px] w-[76px] rounded-lg bg-main text-white"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
