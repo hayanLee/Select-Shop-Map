@@ -8,10 +8,7 @@ const SavedShopsList = ({ userId }) => {
   const fetchSavedShops = async () => {
     try {
       // likes 테이블에서 shop_name 가져오기
-      const { data, error } = await supabase
-        .from('likes')
-        .select('shop_name')
-        .eq('user_id', userId);
+      const { data, error } = await supabase.from('likes').select('shop_name').eq('user_id', userId);
 
       if (error) {
         throw error;
@@ -40,7 +37,9 @@ const SavedShopsList = ({ userId }) => {
   return (
     <ul className="list-none">
       {shops.map((shopName, index) => (
-        <li key={index} className="p-2 bg-white rounded shadow mb-2">{shopName}</li>
+        <li key={index} className="mb-2 rounded bg-white p-2 shadow">
+          {shopName}
+        </li>
       ))}
     </ul>
   );
