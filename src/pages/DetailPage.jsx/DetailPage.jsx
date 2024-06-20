@@ -78,6 +78,7 @@ const DetailPage = () => {
   };
 
   const handleAddReview = async () => {
+
     if (!newReview.trim()) {
       Swal.fire('Error', '입력 후 등록해주세요.', 'error');
       return;

@@ -1,6 +1,8 @@
 import { HiLogin, HiLogout } from 'react-icons/hi';
 import { RiAccountBoxLine } from 'react-icons/ri';
 import { Link, useNavigate } from 'react-router-dom';
+import { RiAccountBoxLine } from 'react-icons/ri';
+import { HiLogout, HiLogin } from 'react-icons/hi';
 import { signOut } from '../../api/auth';
 function Header() {
   const navigate = useNavigate();
