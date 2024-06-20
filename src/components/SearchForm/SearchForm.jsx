@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 import { useKakaoMap } from '../KakaoMap/KakaoMap.context';
 
 const SearchForm = () => {
@@ -7,7 +8,14 @@ const SearchForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSearchKeyword(value);
+    const formattedValue = value.trim().replace(/\s+/g, ' ');
+
+    if (!formattedValue.length) {
+      Swal.fire('검색어를 입력하세요');
+      return;
+    }
+
+    setSearchKeyword(formattedValue + ' 소품샵');
   };
 
   const handleChange = (e) => setValue(e.target.value);
@@ -17,7 +25,7 @@ const SearchForm = () => {
       <input
         type="text"
         name="keyword"
-        placeholder="지역을 입력하세요"
+        placeholder="검색할 지역을 입력해주세요"
         value={value}
         onChange={handleChange}
         className="mb-2 w-full rounded border border-gray-300 p-2"

@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { searchPlaces } from '../../api/kakao/searchPlaces';
-import Marker from '../Marker/Marker';
+
+const KAKAO_KEY = import.meta.env.VITE_KAKAO_KEY;
 
 const KakaoMapContext = createContext();
 
@@ -16,57 +17,66 @@ export function KakaoMapProvider({ children }) {
   const markersRef = useRef([]);
   const infoWindowsRef = useRef([]);
 
-  const { data: places = [], isSuccess } = useQuery({
+  const { data: places = [] } = useQuery({
     queryKey: ['places', { searchKeyword }],
     queryFn: () => searchPlaces(searchKeyword),
-    enabled: isMapLoaded,
+    enabled: isMapLoaded
   });
 
+  // sdk 불러오기
   useEffect(() => {
     loadKakaoMapSDK(() => setIsSDKLoaded(true));
   }, []);
 
+  // map 불러오기
   useEffect(() => {
     if (isSDKLoaded) {
       window.kakao.maps.load(() => setIsMapLoaded(true));
     }
   }, [isSDKLoaded]);
 
+  // 지도에 현재 위치를 중심으로 지도 생성
   useEffect(() => {
-    const initializeMap = async () => {
-      if (isMapLoaded && mapContainerElRef.current) {
-        const { lat, lon } = await getCurrentPosition();
-        const options = {
-          center: new window.kakao.maps.LatLng(lat, lon),
-          level: 5,
-        };
-        const mapInstance = new window.kakao.maps.Map(mapContainerElRef.current, options);
-        setKakaoMapInstance(mapInstance);
-
-        const currentMarker = new window.kakao.maps.Marker({
-          map: mapInstance,
-          position: options.center,
-        });
-
-        window.kakao.maps.event.addListener(currentMarker, 'click', () => {
-          console.log('Current location marker clicked!');
-        });
-      }
-    };
-
     initializeMap();
   }, [isMapLoaded]);
 
   useEffect(() => {
+    if (mapInstance && places.length) createNewMarkers();
+  }, [places]);
+
+  const initializeMap = async () => {
+    if (isMapLoaded && mapContainerElRef.current) {
+      // const { lat, lon } = await getCurrentPosition();
+      const options = {
+        center: new window.kakao.maps.LatLng(37.5666, 126.9782), // 서울로 설정
+        level: 5
+      };
+
+      const mapInstance = new window.kakao.maps.Map(mapContainerElRef.current, options);
+      setKakaoMapInstance(mapInstance);
+
+      // const currentMarker = new window.kakao.maps.Marker({
+      //   map: mapInstance,
+      //   position: options.center
+      // });
+
+      // window.kakao.maps.event.addListener(currentMarker, 'click', () => {
+      //   console.log('Current location marker clicked!');
+      // });
+    }
+  };
+
+  const createNewMarkers = () => {
     if (mapInstance && places.length) {
       clearMarkers();
-      const bounds = new window.kakao.maps.LatLngBounds();
+      const bounds = new window.kakao.maps.LatLngBounds(); // 바운드 객체
+
       places.forEach((place) => {
         const markerPosition = new window.kakao.maps.LatLng(place.y, place.x);
         const marker = new window.kakao.maps.Marker({
           map: mapInstance,
           position: markerPosition,
-          title: place.place_name,
+          title: place.place_name
         });
 
         const content = `
@@ -82,7 +92,7 @@ export function KakaoMapProvider({ children }) {
         const infowindow = new window.kakao.maps.InfoWindow({
           content: content,
           removable: true,
-          zIndex: 1,
+          zIndex: 1
         });
 
         const handleMarkerClick = () => {
@@ -108,8 +118,9 @@ export function KakaoMapProvider({ children }) {
 
       mapInstance.setBounds(bounds);
     }
-  }, [mapInstance, places]);
+  };
 
+  // 마커 지우기
   const clearMarkers = () => {
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
@@ -122,30 +133,15 @@ export function KakaoMapProvider({ children }) {
     setSearchKeyword,
     mapInstance,
     places,
-    mapContainerElRef,
+    mapContainerElRef
   };
 
-  return (
-    <KakaoMapContext.Provider value={value}>
-      {children}
-      {isSuccess &&
-        mapInstance &&
-        places.map((place) => (
-          <Marker
-            key={place.id}
-            place={place}
-            mapInstance={mapInstance}
-            markersRef={markersRef}
-            infoWindowsRef={infoWindowsRef}
-          />
-        ))}
-    </KakaoMapContext.Provider>
-  );
+  return <KakaoMapContext.Provider value={value}>{children}</KakaoMapContext.Provider>;
 }
 
 function loadKakaoMapSDK(onLoadCallback) {
   const script = document.createElement('script');
-  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=cb8906a483c5671f6f94b58a926ef09c&autoload=false&libraries=services`;
+  script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=services`;
   script.async = true;
   script.onload = onLoadCallback;
   script.onerror = () => {
@@ -154,23 +150,35 @@ function loadKakaoMapSDK(onLoadCallback) {
   document.head.appendChild(script);
 }
 
-async function getCurrentPosition() {
-  return new Promise((resolve, reject) => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-          });
-        },
-        (error) => reject(error)
-      );
-    } else {
-      reject(new Error('Geolocation is not supported by this browser.'));
-    }
-  });
-}
+// async function getCurrentPosition() {
+//   return new Promise((resolve, reject) => {
+//     if (navigator.geolocation) {
+//       navigator.geolocation.getCurrentPosition(
+//         (position) => {
+//           resolve({
+//             lat: position.coords.latitude,
+//             lon: position.coords.longitude
+//           });
+//         },
+//         (error) => reject(error)
+//       );
+//     } else {
+//       reject(new Error('Geolocation is not supported by this browser.'));
+//     }
+//   });
+// }
+
+// function getCurrentAddress({ lat, lon }) {
+//   axios
+//     .get(`https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lat}&y=${lon}`, {
+//       headers: { Authorization: `KakaoAK ${KAKAO_KEY}` }
+//     })
+//     .then((result) => {
+//       //법정동 기준으로 동단위의 값을 가져온다
+//       // let location = result.documents[0].region_3depth_name;
+//       console.log(result);
+//     });
+// }
 
 // 컴포넌트 자체 (지도 로드 + 검색)
 
