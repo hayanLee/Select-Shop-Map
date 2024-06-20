@@ -1,26 +1,27 @@
 import { useMutation } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
 import mainIcon from '../../assets/mainIcon.png';
+import { AuthContext } from '../../contexts/AuthContext';
+import Comment from '../../components/CommentComponent';
 
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [userId, setUserId] = useState('');
   const { shopId } = useParams();
   const location = useLocation();
-  const storedUserInfo = localStorage.getItem('userInfo');
+  const { isAuthenticated, userInfo } = useContext(AuthContext);
 
   const { place_name: shop_name, road_address_name } = location.state;
 
   useEffect(() => {
-    if (storedUserInfo) {
-      const { id } = JSON.parse(storedUserInfo);
-      setUserId(id);
+    if (userInfo) {
+      setUserId(userInfo.id);
     }
-  }, [storedUserInfo]);
+  }, [userInfo]);
 
   useEffect(() => {
     (async () => {
@@ -40,15 +41,22 @@ const DetailPage = () => {
     mutationFn: (data) => deleteLike(data),
     onSuccess: () => setIsLiked(false)
   });
-  ``;
 
   const handleLike = async () => {
-    if (!storedUserInfo) {
+    if (!isAuthenticated) {
       Swal.fire('Error', '해당 기능은 로그인 후 이용 가능합니다.', 'error');
       return;
     }
     if (isLiked) await DeleteLikeMutation({ userId, shopId });
     else await AddLikeMutation({ userId, shopId, shop_name });
+  };
+
+  const handleEdit = (commentId) => {
+    // 댓글 수정 로직
+  };
+
+  const handleDelete = (commentId) => {
+    // 댓글 삭제 로직
   };
 
   return (
@@ -77,18 +85,12 @@ const DetailPage = () => {
           </section>
           <section className="mt-6 space-y-[30px]">
             {[1, 2, 3].map((item, index) => (
-              <div key={index} className="rounded-lg bg-white p-4 shadow-md">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-bold">작성자</p>
-                    <p>안녕하세요</p>
-                  </div>
-                  <div className="flex space-x-[22px]">
-                    <button className="h-[35px] w-[76px] rounded-lg bg-point text-white">수정</button>
-                    <button className="h-[35px] w-[76px] rounded-lg bg-main text-white">삭제</button>
-                  </div>
-                </div>
-              </div>
+              <Comment 
+                key={index} 
+                comment={{ id: index, text: '안녕하세요', userId: userInfo ? userInfo.id : '' }} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete} 
+              />
             ))}
           </section>
         </div>
