@@ -520,6 +520,7 @@ export function KakaoMapProvider({ children }) {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('홍대 소품샵');
   const [mapInstance, setKakaoMapInstance] = useState(null);
+  const [clusterer, setClusterer] = useState(null); // 클러스터러 상태 추가
   const mapContainerElRef = useRef(null);
   const markersRef = useRef([]);
   const infoWindowsRef = useRef([]);
@@ -530,12 +531,12 @@ export function KakaoMapProvider({ children }) {
     enabled: isMapLoaded
   });
 
-  // sdk 불러오기
+  // SDK 불러오기
   useEffect(() => {
     loadKakaoMapSDK(() => setIsSDKLoaded(true));
   }, []);
 
-  // map 불러오기
+  // 지도 불러오기
   useEffect(() => {
     if (isSDKLoaded) {
       window.kakao.maps.load(() => setIsMapLoaded(true));
@@ -563,28 +564,43 @@ export function KakaoMapProvider({ children }) {
       const mapInstance = new window.kakao.maps.Map(mapContainerElRef.current, options);
       setKakaoMapInstance(mapInstance);
 
-      ///////////////////////////////////////////////// 클러스터 테스트
+        ///////////////////////////////////////////////// 클러스터 테스트
       // 마커를 배열 단위로 묶음
-      var markers = positions.map((position) => {
-        return new window.kakao.maps.Marker({
-          position: new window.kakao.maps.LatLng(position.lat, position.lng)
-        });
-      });
+      // var markers = positions.map((position) => {
+      //   return new window.kakao.maps.Marker({
+      //     position: new window.kakao.maps.LatLng(position.lat, position.lng)
+      //   });
+      // });
 
-      console.log(markers);
+      // console.log(markers);
 
-      // 클러스터 객체 만들기
-      const markerClusterer = new window.kakao.maps.MarkerClusterer({
+      // // 클러스터 객체 만들기
+      // const markerClusterer = new window.kakao.maps.MarkerClusterer({
+      //   map: mapInstance,
+      //   averageCenter: true,
+      //   minLevel: 5
+      // });
+
+      // console.log('>>>클러스터', markerClusterer);
+
+      // // 마커들을 배열로 묶어서 추가
+      // markerClusterer.addMarkers(markers);
+      /////////////////////////////////////////////////요기까지 테스트 중
+
+
+      // 클러스터러 초기화
+      const clusterer = new window.kakao.maps.MarkerClusterer({
         map: mapInstance,
         averageCenter: true,
-        minLevel: 5
+        minLevel: 6
       });
+      setClusterer(clusterer);
 
-      console.log('>>>클러스터', markerClusterer);
 
-      // 마커들을 배열로 묶어서 추가
-      markerClusterer.addMarkers(markers);
-      /////////////////////////////////////////////////요기까지 테스트 중
+      window.kakao.maps.event.addListener(clusterer, 'clusterclick', function(cluster) {
+        const level = mapInstance.getLevel();
+        mapInstance.setLevel(level - 2, { anchor: cluster.getCenter() }); // 적절한 레벨씩 확대
+      });
 
       const currentMarker = new window.kakao.maps.Marker({
         map: mapInstance,
@@ -607,7 +623,7 @@ export function KakaoMapProvider({ children }) {
 
         // 반복문 돌면서 마커 객체 만들기
         const marker = new window.kakao.maps.Marker({
-          map: mapInstance,
+          // map: mapInstance, // 원본 코드: 마커를 지도에 추가
           position: markerPosition,
           title: place.place_name
         });
@@ -649,6 +665,9 @@ export function KakaoMapProvider({ children }) {
         bounds.extend(markerPosition);
       });
 
+      // 마커를 클러스터러에 추가
+      clusterer.addMarkers(markersRef.current);
+
       mapInstance.setBounds(bounds);
     }
   };
@@ -656,7 +675,8 @@ export function KakaoMapProvider({ children }) {
   // 마커 지우기
   const clearMarkers = () => {
     markersRef.current.forEach((marker) => marker.setMap(null));
-    // clusterer.clear();
+    // clusterer.clear(); // 원본 코드
+    clusterer.clear(); // 클러스터러 지우기
     markersRef.current = [];
     infoWindowsRef.current.forEach((infowindow) => infowindow.close());
     infoWindowsRef.current = [];
@@ -684,6 +704,7 @@ function loadKakaoMapSDK(onLoadCallback) {
   };
   document.head.appendChild(script);
 }
+
 
 // async function getCurrentPosition() {
 //   return new Promise((resolve, reject) => {
