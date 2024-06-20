@@ -86,7 +86,7 @@ export function KakaoMapProvider({ children }) {
         searchDetailAddrFromCoords(geocoder, mapInstance.getCenter(), function (result, status) {
           if (status === window.kakao.maps.services.Status.OK) {
             const roadAddress = result[0].address;
-            console.log(roadAddress);
+            // console.log(roadAddress);
             const regionAddr = roadAddress ? `${roadAddress.region_3depth_name}` : '';
             // const regionAddr = roadAddress ? `${roadAddress.region_1depth_name} ${roadAddress.region_2depth_name}` : '';
             setRegionAddress(regionAddr);
@@ -164,7 +164,7 @@ export function KakaoMapProvider({ children }) {
             iwElement.style.background = 'none';
             iwElement.style.boxShadow = 'none';
           }
-          console.log(`${place.place_url}`);
+          // console.log(`${place.place_url}`);
         };
 
         window.kakao.maps.event.addListener(marker, 'click', handleMarkerClick);
