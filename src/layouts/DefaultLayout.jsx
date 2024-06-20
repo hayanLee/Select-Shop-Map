@@ -3,9 +3,11 @@ import Header from '../components/Header';
 
 function DefaultLayout() {
   return (
-    <div className="h-screen w-full">
+    <div className="font-NexonGothic h-screen w-full">
       <Header />
-      <Outlet />
+      <div className="h-full sm:px-11 xl:px-64">
+        <Outlet />
+      </div>
     </div>
   );
 }

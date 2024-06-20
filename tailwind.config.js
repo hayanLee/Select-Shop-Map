@@ -8,11 +8,13 @@ export default {
         main: '#9AC1E2',
         hover: '#BCD2E9',
         ligthPoint: '#E5E1EF',
-        point: '#E0A8CD'
+        point: '#E0A8CD',
+        input: '#F2F4F8'
       },
       gridTemplateColumns: {
-        main: 'minmax(300px, 0.5fr) 2fr'
-      }
+        main: 'minmax(400px, 0.5fr) 2fr'
+      },
+      fontFamily: { NexonGothic: ['NexonGothic'] }
     }
   },
   plugins: []
