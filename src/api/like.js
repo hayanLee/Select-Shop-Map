@@ -1,19 +1,17 @@
 import supabase from '../supabase/supabaseClient';
 import Swal from 'sweetalert2';
 
-// 🔥
 export const isLikedShop = async ({ userId, shopId }) => {
   try {
     const { data, error } = await supabase
       .from('likes')
       .select('*')
       .eq('user_id', userId)
-      .eq('kakao_shop_id', shopId)
-      .select();
+      .eq('kakao_shop_id', shopId);
     if (error) throw error;
     return data.length ? true : false;
   } catch {
-    Swal.fire('Error', '좋아요를 가저오는 중 오류가 발생하였습니다', 'error');
+    Swal.fire('Error', '좋아요를 가져오는 중 오류가 발생하였습니다', 'error');
   }
 };
 
@@ -40,5 +38,15 @@ export const deleteLike = async ({ userId, shopId }) => {
     Swal.fire('Success', '좋아요를 취소하였습니다', 'success');
   } catch (err) {
     Swal.fire('Error', '좋아요를 취소중 오류가 발생하였습니다', 'error');
+  }
+};
+
+export const getUserLikedShops = async (userId) => {
+  try {
+    const { data, error } = await supabase.from('likes').select('shop_name').eq('user_id', userId);
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    Swal.fire('Error', '찜한 상점을 불러오는 중 오류가 발생하였습니다', 'error');
   }
 };
