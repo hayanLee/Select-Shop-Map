@@ -5,6 +5,10 @@ import PlaceCard from '../PlaceCard/PlaceCard';
 const SearchList = () => {
   const { places, searchKeyword } = useKakaoMap();
 
+  if (!searchKeyword) {
+    return <p className="mt-6 flex justify-center">🦐 소품샵을 찾을 지역을 입력해주세요 🎁</p>;
+  }
+
   if (places.length === 0) {
     const formattedKeyword = searchKeyword.replace(/ 소품샵$/, '');
     return <p className="mt-6 flex justify-center">{`"${formattedKeyword}" 에 대한 검색 결과가 없습니다.`}</p>;

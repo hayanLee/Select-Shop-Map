@@ -1,25 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import { AuthContext } from '../contexts/AuthContext';
 
-const PrivateRoute = ({ children }) => {
-  const { isAuthenticated } = useContext(AuthContext);
-  const [showAlert, setShowAlert] = useState(false);
+const PrivateRoute = ({ element }) => {
+  const userInfo = localStorage.getItem('userInfo');
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      Swal.fire('로그인되지 않은 사용자입니다!', '로그인부터 해주세요', 'warning').then(() => {
-        setShowAlert(true);
-      });
-    }
-  }, [isAuthenticated]);
-
-  if (showAlert) {
-    return <Navigate to="/login" />;
+  if (!userInfo) {
+    return <Navigate to="/login" replace />;
   }
 
-  return isAuthenticated ? children : null;
+  return element;
 };
 
 export default PrivateRoute;

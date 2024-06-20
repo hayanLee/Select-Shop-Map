@@ -1,13 +1,9 @@
-import supabase from '../supabase/supabaseClient';
 import Swal from 'sweetalert2';
+import supabase from '../supabase/supabaseClient';
 
 export const isLikedShop = async ({ userId, shopId }) => {
   try {
-    const { data, error } = await supabase
-      .from('likes')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('kakao_shop_id', shopId);
+    const { data, error } = await supabase.from('likes').select('*').eq('user_id', userId).eq('kakao_shop_id', shopId);
     if (error) throw error;
     return data.length ? true : false;
   } catch {
@@ -16,6 +12,7 @@ export const isLikedShop = async ({ userId, shopId }) => {
 };
 
 export const addLike = async ({ userId, shopId, shop_name }) => {
+  console.log(userId, shopId, shop_name);
   try {
     const { error } = await supabase.from('likes').insert({
       user_id: userId,
@@ -31,6 +28,7 @@ export const addLike = async ({ userId, shopId, shop_name }) => {
 };
 
 export const deleteLike = async ({ userId, shopId }) => {
+  console.log(userId, shopId);
   try {
     const { error } = await supabase.from('likes').delete().eq('user_id', userId).eq('kakao_shop_id', shopId);
 

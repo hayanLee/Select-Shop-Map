@@ -15,11 +15,7 @@ const router = createBrowserRouter([
       { path: '/shop/:shopId', element: <DetailPage /> },
       {
         path: '/myPage',
-        element: (
-          <PrivateRoute>
-            <MyPage />
-          </PrivateRoute>
-        )
+        element: <PrivateRoute element={<MyPage />} />
       },
       { path: '/login', element: <LoginPage /> },
       { path: '/signUp', element: <SignUpPage /> }
