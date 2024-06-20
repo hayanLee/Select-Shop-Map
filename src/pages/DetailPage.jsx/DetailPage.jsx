@@ -1,29 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
 import { addReview, deleteReview, getShopReviewsByShopId, modifyReview } from '../../api/review';
 import mainIcon from '../../assets/mainIcon.png';
-import { AuthContext } from '../../contexts/AuthContext';
 
 const DetailPage = () => {
+  const { id: userId } = JSON.parse(localStorage.getItem('userInfo')) || '';
   const [isLiked, setIsLiked] = useState(false);
-  const [userId, setUserId] = useState('');
   const [newReview, setNewReview] = useState('');
   const { shopId } = useParams();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { isAuthenticated, userInfo } = useContext(AuthContext);
-
   const { place_name: shop_name, road_address_name } = location.state;
 
-  useEffect(() => {
-    if (userInfo) {
-      setUserId(userInfo.id);
-    }
-  }, [userInfo]);
+  const { data: reviews } = useQuery({
+    queryKey: ['reviews', shopId],
+    queryFn: () => getShopReviewsByShopId(shopId),
+    enabled: !!shopId
+  });
 
   useEffect(() => {
     (async () => {
@@ -34,20 +31,14 @@ const DetailPage = () => {
     })();
   }, [userId, shopId]);
 
-  const addLikeMutation = useMutation({
+  const { mutateAsync: addLikeMutation } = useMutation({
     mutationFn: (data) => addLike(data),
     onSuccess: () => setIsLiked(true)
   });
 
-  const deleteLikeMutation = useMutation({
+  const { mutateAsync: deleteLikeMutation } = useMutation({
     mutationFn: (data) => deleteLike(data),
     onSuccess: () => setIsLiked(false)
-  });
-
-  const { data: reviews } = useQuery({
-    queryKey: ['reviews', shopId],
-    queryFn: () => getShopReviewsByShopId(shopId),
-    enabled: !!shopId
   });
 
   const addReviewMutation = useMutation({
@@ -69,12 +60,13 @@ const DetailPage = () => {
   });
 
   const handleLike = async () => {
-    if (!isAuthenticated) {
+    if (!userId) {
       Swal.fire('Error', '해당 기능은 로그인 후 이용 가능합니다.', 'error');
       return;
     }
-    if (isLiked) await deleteLikeMutation.mutateAsync({ userId, shopId });
-    else await addLikeMutation.mutateAsync({ userId, shopId, shop_name });
+
+    if (isLiked) await deleteLikeMutation({ userId, shopId });
+    else await addLikeMutation({ userId, shopId, shop_name });
   };
 
   const handleAddReview = async () => {

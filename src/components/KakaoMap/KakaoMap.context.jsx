@@ -13,10 +13,10 @@ export const useKakaoMap = () => useContext(KakaoMapContext);
 export function KakaoMapProvider({ children }) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('홍대 소품샵'); // 검색어
+  const [searchKeyword, setSearchKeyword] = useState(localStorage.getItem('lastKeyword') || ''); // 검색어
   const [mapInstance, setKakaoMapInstance] = useState(null); // 지도 객체
   const [clusterer, setClusterer] = useState(null); // 클러스터
-  const [geocoder, setGeocoder] = useState(null);
+  const geocoderRef = useRef(null);
   const mapContainerElRef = useRef(null);
   const markersRef = useRef([]);
   const infoWindowsRef = useRef([]);
@@ -50,12 +50,26 @@ export function KakaoMapProvider({ children }) {
     if (mapInstance && places.length) createMarkersAndClusters();
   }, [places]);
 
+  useEffect(() => {
+    localStorage.setItem('lastKeyword', searchKeyword);
+  }, [searchKeyword]);
+
+  useEffect(() => {
+    if (places.length > 0) {
+      localStorage.setItem('lastKeyword', searchKeyword);
+      localStorage.setItem('lastX', places[0].x);
+      localStorage.setItem('lastY', places[0].y);
+    }
+  }, [searchKeyword, places]);
+
   const initializeMap = async () => {
     if (isMapLoaded && mapContainerElRef.current) {
-      // const { lat, lon } = await getCurrentPosition();
+      const { lat, lon } = await getCurrentPosition();
+      const savedX = localStorage.getItem('lastX');
+      const savedY = localStorage.getItem('lastY');
       const options = {
-        center: new window.kakao.maps.LatLng(37.5666, 126.9782), // 서울로 설정
-        // center: new window.kakao.maps.LatLng(lat, lon),
+        center:
+          savedX && savedY ? new window.kakao.maps.LatLng(savedY, savedX) : new window.kakao.maps.LatLng(lat, lon), // 저장된 위치 또는 현재 위치
         level: 5
       };
 
@@ -73,7 +87,7 @@ export function KakaoMapProvider({ children }) {
 
       // 주소-좌표 변환 객체
       const geocoder = new window.kakao.maps.services.Geocoder();
-      setGeocoder(geocoder);
+      geocoderRef.current = geocoder;
 
       // 클러스터 클릭 이벤트 등록
       window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster) {
@@ -85,10 +99,9 @@ export function KakaoMapProvider({ children }) {
       window.kakao.maps.event.addListener(mapInstance, 'idle', function () {
         searchDetailAddrFromCoords(geocoder, mapInstance.getCenter(), function (result, status) {
           if (status === window.kakao.maps.services.Status.OK) {
+            console.log(result[0]);
             const roadAddress = result[0].address;
-            // console.log(roadAddress);
             const regionAddr = roadAddress ? `${roadAddress.region_3depth_name}` : '';
-            // const regionAddr = roadAddress ? `${roadAddress.region_1depth_name} ${roadAddress.region_2depth_name}` : '';
             setRegionAddress(regionAddr);
 
             if (searchButtonRef.current) {
@@ -100,6 +113,7 @@ export function KakaoMapProvider({ children }) {
     }
   };
 
+  // 재검색 버튼 클릭 이벤트
   const handleSearchButtonClick = () => {
     if (regionAddress) {
       setSearchKeyword(`${regionAddress} 소품샵`);
@@ -224,7 +238,7 @@ export function KakaoMapProvider({ children }) {
       {children}
       <div
         ref={searchButtonRef}
-        className="absolute bottom-2 left-1/2 z-10 hidden -translate-x-1/2 transform cursor-pointer rounded border border-gray-300 bg-point p-4 shadow-lg"
+        className="absolute bottom-2 left-1/2 z-10 hidden -translate-x-1/2 transform cursor-pointer rounded border border-gray-300 bg-point p-3 shadow-lg"
         onClick={handleSearchButtonClick}
       >
         현재 지도에서 재검색
@@ -244,20 +258,20 @@ function loadKakaoMapSDK(onLoadCallback) {
   document.head.appendChild(script);
 }
 
-// async function getCurrentPosition() {
-//   return new Promise((resolve, reject) => {
-//     if (navigator.geolocation) {
-//       navigator.geolocation.getCurrentPosition(
-//         (position) => {
-//           resolve({
-//             lat: position.coords.latitude,
-//             lon: position.coords.longitude
-//           });
-//         },
-//         (error) => reject(error)
-//       );
-//     } else {
-//       reject(new Error('Geolocation is not supported by this browser.'));
-//     }
-//   });
-// }
+async function getCurrentPosition() {
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude
+          });
+        },
+        (error) => reject(error)
+      );
+    } else {
+      reject(new Error('Geolocation is not supported by this browser.'));
+    }
+  });
+}

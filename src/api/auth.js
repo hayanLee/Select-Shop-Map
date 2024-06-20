@@ -1,5 +1,5 @@
-import supabase from '../supabase/supabaseClient';
 import Swal from 'sweetalert2';
+import supabase from '../supabase/supabaseClient';
 
 export const signUpWithEmail = async ({ email, password, nickname }) => {
   try {
@@ -27,6 +27,7 @@ export const loginWithEmail = async ({ email, password }) => {
     if (error) throw error;
     if (data && data.user) {
       Swal.fire('Success', '로그인에 성공하였습니다.', 'success');
+      localStorage.clear();
       return await getUserInfo(data.user.id);
     }
   } catch (error) {
@@ -42,29 +43,11 @@ export const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     Swal.fire('Success', '로그아웃 되었습니다.', 'success');
-    localStorage.removeItem('userInfo'); // 로그아웃 시 사용자 정보 삭제
-
-    // 로컬 스토리지에서 사용자 정보 삭제
-    localStorage.removeItem('userInfo');
+    localStorage.clear();
   } catch (error) {
     console.error('로그아웃 중 오류가 발생했습니다:', error.message);
     Swal.fire('Error', '로그아웃 중 오류가 발생했습니다.', 'error');
   }
-};
-
-//로그인 한 사용자 정보 가져오기
-export const getUser = async () => {
-  try {
-    const { data, error } = await supabase.auth.getUser();
-    if (error) throw error;
-    if (data.user) {
-      return data.user;
-    }
-  } catch (error) {
-    console.error('로그인한 유저를 찾을 수 없습니다:', error.message);
-    Swal.fire('Error', '로그인한 유저를 찾을 수 없습니다.', 'error');
-  }
-  return null;
 };
 
 //db테이블에 사용자 데이터 삽입
