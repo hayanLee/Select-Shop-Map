@@ -1,4 +1,5 @@
 import supabase from '../supabase/supabaseClient';
+import Swal from 'sweetalert2';
 
 export const signUpWithEmail = async ({ email, password, nickname }) => {
   try {
@@ -11,11 +12,11 @@ export const signUpWithEmail = async ({ email, password, nickname }) => {
     if (data.user) {
       const { id, email } = data.user;
       await insertUserData({ id, email, nickname });
-      alert('회원가입에 성공하였습니다!');
+      Swal.fire('Success', '회원가입에 성공하였습니다!', 'success');
     }
   } catch (error) {
     console.error('회원가입 중 오류가 발생했습니다:', error.message);
-    alert('회원가입 중 오류가 발생했습니다.');
+    Swal.fire('Error', '회원가입 중 오류가 발생했습니다.', 'error');
   }
 };
 
@@ -25,12 +26,12 @@ export const loginWithEmail = async ({ email, password }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password }); //🔥
     if (error) throw error;
     if (data && data.user) {
-      alert('로그인에 성공하였습니다.');
+      Swal.fire('Success', '로그인에 성공하였습니다.', 'success');
       return await getUserInfo(data.user.id);
     }
   } catch (error) {
     console.error('로그인 중 오류가 발생하였습니다:', error.message);
-    alert('로그인 중 오류가 발생하였습니다.');
+    Swal.fire('Error', '로그인 중 오류가 발생하였습니다.', 'error');
   }
   return null;
 };
@@ -40,14 +41,14 @@ export const signOut = async () => {
   try {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    alert('로그아웃 되었습니다.');
+    Swal.fire('Success', '로그아웃 되었습니다.', 'success');
     localStorage.removeItem('userInfo'); // 로그아웃 시 사용자 정보 삭제
 
     // 로컬 스토리지에서 사용자 정보 삭제
     localStorage.removeItem('userInfo');
   } catch (error) {
     console.error('로그아웃 중 오류가 발생했습니다:', error.message);
-    alert('로그아웃 중 오류가 발생했습니다.');
+    Swal.fire('Error', '로그아웃 중 오류가 발생했습니다.', 'error');
   }
 };
 
@@ -61,7 +62,7 @@ export const getUser = async () => {
     }
   } catch (error) {
     console.error('로그인한 유저를 찾을 수 없습니다:', error.message);
-    alert('로그인한 유저를 찾을 수 없습니다.');
+    Swal.fire('Error', '로그인한 유저를 찾을 수 없습니다.', 'error');
   }
   return null;
 };
@@ -79,7 +80,7 @@ export const insertUserData = async (userInfo) => {
     if (error) throw error;
   } catch (error) {
     console.error('회원 정보 저장 중 오류가 발생했습니다:', error.message);
-    alert('회원 정보 저장 중 오류가 발생했습니다.');
+    Swal.fire('Error', '유저 정보 조회 중 오류가 발생하였습니다.', 'error');
   }
 };
 
@@ -94,19 +95,24 @@ export const getUserInfo = async (userId) => {
     }
   } catch (error) {
     console.error('유저 정보 조회 중 오류가 발생하였습니다:', error.message);
-    alert('유저 정보 조회 중 오류가 발생하였습니다.');
+    Swal.fire('Error', '유저 정보 조회 중 오류가 발생하였습니다.', 'error');
   }
   return null;
 };
 
 export const isEmailRegistered = async ({ email }) => {
-  const { data, error } = await supabase.from('users').select('*').eq('email', email);
-  if (error) throw error;
+  try {
+    const { data, error } = await supabase.from('users').select('*').eq('email', email);
+    if (error) throw error;
 
-  if (data.length > 0) {
-    alert('이미 가입된 이메일입니다.');
-    return false;
-  } else {
-    return true;
+    if (data.length > 0) {
+      Swal.fire('Info', '이미 가입된 이메일입니다.', 'info');
+      return false;
+    } else {
+      return true;
+    }
+  } catch (error) {
+    console.error('이메일 확인 중 오류가 발생하였습니다:', error.message);
+    Swal.fire('Error', '이메일 확인 중 오류가 발생하였습니다.', 'error');
   }
 };
