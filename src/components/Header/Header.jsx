@@ -25,21 +25,20 @@ function Header() {
           {storedUserInfo ? (
             <div className="flex items-center space-x-4">
               <Link to="/mypage" className="flex items-center text-blue-950">
-                <RiAccountBoxLine className="mr-1 text-xl" />
-                <p className="text-lg font-bold">My Page</p>
+                <RiAccountBoxLine className="mr-1 text-2xl" />
+                <p className="text-lg font-bold"></p>
               </Link>
               <button
                 className="flex cursor-pointer items-center text-lg font-bold text-blue-950"
                 onClick={handleLogout}
               >
-                <HiLogout className="mr-1 text-xl" />
-                Log Out
+                <HiLogout className="mr-1 text-2xl" />
               </button>
             </div>
           ) : (
             <Link to="/login" className="flex items-center text-blue-950">
-              <HiLogin className="mr-1 text-xl" />
-              <p className="text-lg font-bold">Log In</p>
+              <HiLogin className="mr-2 text-2xl" />
+              <p className="text-lg font-bold">LOGIN</p>
             </Link>
           )}
         </div>
