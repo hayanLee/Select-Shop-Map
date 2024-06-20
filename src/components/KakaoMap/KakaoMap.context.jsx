@@ -667,7 +667,8 @@ export function KakaoMapProvider({ children }) {
     setSearchKeyword,
     mapInstance,
     places,
-    mapContainerElRef
+    mapContainerElRef,
+    isMapLoaded // 로딩 상태 추가
   };
 
   return <KakaoMapContext.Provider value={value}>{children}</KakaoMapContext.Provider>;
