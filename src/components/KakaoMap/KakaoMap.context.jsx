@@ -13,7 +13,7 @@ export const useKakaoMap = () => useContext(KakaoMapContext);
 export function KakaoMapProvider({ children }) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState(''); // 검색어
+  const [searchKeyword, setSearchKeyword] = useState('홍대 소품샵'); // 검색어
   const [mapInstance, setKakaoMapInstance] = useState(null); // 지도 객체
   const [clusterer, setClusterer] = useState(null); // 클러스터
   const [geocoder, setGeocoder] = useState(null);
@@ -111,7 +111,6 @@ export function KakaoMapProvider({ children }) {
 
   // 좌표로 상세 주소 정보를 요청
   function searchDetailAddrFromCoords(geocoder, coords, callback) {
-    console.log('>>>>', coords);
     geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
   }
 
