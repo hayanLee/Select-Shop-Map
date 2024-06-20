@@ -1,5 +1,6 @@
-import { LuArrowRightToLine } from 'react-icons/lu';
 import { Link, useNavigate } from 'react-router-dom';
+import { RiAccountBoxLine } from 'react-icons/ri';
+import { HiLogout, HiLogin } from 'react-icons/hi';
 import { signOut } from '../../api/auth';
 
 function Header() {
@@ -17,24 +18,29 @@ function Header() {
       <div className="mx-auto flex h-16 w-full max-w-screen-xl items-center justify-between px-4 md:px-12">
         <div className="flex items-center">
           <Link to={'/'}>
-            <img src="../../../public/favicon.png" alt="logo" className="mr-2" style={{ height: '50px' }} />
+            <img src="/favicon.png" alt="logo" className="mr-2" style={{ height: '50px' }} />
           </Link>
           <p className="text-xl font-bold text-blue-950">칠리칠리 소품랜드</p>
         </div>
         <div className="flex items-center">
           {storedUserInfo ? (
-            <div className="flex items-center">
-              <Link to="/mypage" className="ml-3 text-blue-950">
+            <div className="flex items-center space-x-4">
+              <Link to="/mypage" className="flex items-center text-blue-950">
+                <RiAccountBoxLine className="mr-1 text-xl" />
                 <p className="text-lg font-bold">My Page</p>
               </Link>
-              <p className="ml-3 cursor-pointer text-lg font-bold text-blue-950" onClick={handleLogout}>
+              <button
+                className="flex cursor-pointer items-center text-lg font-bold text-blue-950"
+                onClick={handleLogout}
+              >
+                <HiLogout className="mr-1 text-xl" />
                 Log Out
-              </p>
+              </button>
             </div>
           ) : (
-            <Link to="/login" className="ml-3 flex items-center text-blue-950">
-              <LuArrowRightToLine className="h-5 w-5 text-2xl" />
-              <p className="ml-3 text-lg font-bold">Log In</p>
+            <Link to="/login" className="flex items-center text-blue-950">
+              <HiLogin className="mr-1 text-xl" />
+              <p className="text-lg font-bold">Log In</p>
             </Link>
           )}
         </div>
