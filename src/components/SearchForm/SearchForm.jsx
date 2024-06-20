@@ -28,9 +28,9 @@ const SearchForm = () => {
         placeholder="검색할 지역을 입력해주세요"
         value={value}
         onChange={handleChange}
-        className="mb-2 w-full rounded border border-gray-300 p-2"
+        className="mb-2 w-full rounded border border-gray-300 p-2 focus:outline-active"
       />
-      <button type="submit" className="w-full rounded bg-blue-500 p-2 text-white">
+      <button type="submit" className="w-full rounded bg-active p-2 text-white hover:bg-hover">
         검색
       </button>
     </form>
