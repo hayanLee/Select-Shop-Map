@@ -1,9 +1,11 @@
+import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
 import mainIcon from '../../assets/mainIcon.png';
+
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [userId, setUserId] = useState('');
@@ -15,24 +17,38 @@ const DetailPage = () => {
 
   useEffect(() => {
     if (storedUserInfo) {
-      (async () => {
-        const { id } = JSON.parse(storedUserInfo);
-        setUserId(id);
-        const likedStatus = await isLikedShop({ userId: id, shopId });
-        setIsLiked(likedStatus);
-      })();
+      const { id } = JSON.parse(storedUserInfo);
+      setUserId(id);
     }
-  }, [storedUserInfo, shopId]);
+  }, [storedUserInfo]);
+
+  useEffect(() => {
+    (async () => {
+      if (userId && shopId) {
+        const likedStatus = await isLikedShop({ userId, shopId });
+        setIsLiked(likedStatus);
+      }
+    })();
+  }, [userId, shopId]);
+
+  const { mutateAsync: AddLikeMutation } = useMutation({
+    mutationFn: (data) => addLike(data),
+    onSuccess: () => setIsLiked(true)
+  });
+
+  const { mutateAsync: DeleteLikeMutation } = useMutation({
+    mutationFn: (data) => deleteLike(data),
+    onSuccess: () => setIsLiked(false)
+  });
+  ``;
 
   const handleLike = async () => {
     if (!storedUserInfo) {
       Swal.fire('Error', '해당 기능은 로그인 후 이용 가능합니다.', 'error');
       return;
     }
-    if (isLiked) await deleteLike({ userId, shopId });
-    else await addLike({ userId, shopId, shop_name });
-
-    setIsLiked(!isLiked);
+    if (isLiked) await DeleteLikeMutation({ userId, shopId });
+    else await AddLikeMutation({ userId, shopId, shop_name });
   };
 
   return (
@@ -52,7 +68,10 @@ const DetailPage = () => {
         <div className="mt-6 rounded-lg bg-hover p-[48px_36px_30px_36px] shadow-md">
           <section className="rounded-lg bg-white p-4 shadow-md">
             <div className="flex items-center space-x-[22px]">
-              <textarea placeholder="리뷰를 남겨주세요" className="h-[70px] w-full resize-none rounded-lg border p-2" />
+              <textarea
+                placeholder="리뷰를 남겨주세요"
+                className="h-[70px] w-full resize-none rounded-lg border p-2 focus:outline-active"
+              />
               <button className="h-[35px] w-[76px] rounded-lg bg-point text-white">등록</button>
             </div>
           </section>
