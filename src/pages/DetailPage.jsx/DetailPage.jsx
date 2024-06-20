@@ -93,10 +93,6 @@ const DetailPage = () => {
     await deleteReviewMutation.mutateAsync(reviewId);
   };
 
-  if (!userInfo) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="flex min-h-screen justify-center">
       <main className="w-full max-w-[1320px] p-4">
