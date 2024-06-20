@@ -1,18 +1,20 @@
-import { useMutation } from '@tanstack/react-query';
 import React, { useEffect, useState, useContext } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
+import { addReview, deleteReview, getShopReviewsByShopId, modifyReview } from '../../api/review';
 import mainIcon from '../../assets/mainIcon.png';
 import { AuthContext } from '../../contexts/AuthContext';
-import Comment from '../../components/CommentComponent';
 
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [userId, setUserId] = useState('');
+  const [newReview, setNewReview] = useState('');
   const { shopId } = useParams();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const { isAuthenticated, userInfo } = useContext(AuthContext);
 
   const { place_name: shop_name, road_address_name } = location.state;
@@ -32,14 +34,38 @@ const DetailPage = () => {
     })();
   }, [userId, shopId]);
 
-  const { mutateAsync: AddLikeMutation } = useMutation({
+  const addLikeMutation = useMutation({
     mutationFn: (data) => addLike(data),
     onSuccess: () => setIsLiked(true)
   });
 
-  const { mutateAsync: DeleteLikeMutation } = useMutation({
+  const deleteLikeMutation = useMutation({
     mutationFn: (data) => deleteLike(data),
     onSuccess: () => setIsLiked(false)
+  });
+
+  const { data: reviews } = useQuery({
+    queryKey: ['reviews', shopId],
+    queryFn: () => getShopReviewsByShopId(shopId),
+    enabled: !!shopId
+  });
+
+  const addReviewMutation = useMutation({
+    mutationFn: (data) => addReview(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['reviews', shopId]);
+      setNewReview('');
+    }
+  });
+
+  const updateReviewMutation = useMutation({
+    mutationFn: (data) => modifyReview(data),
+    onSuccess: () => queryClient.invalidateQueries(['reviews', shopId])
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: (data) => deleteReview(data),
+    onSuccess: () => queryClient.invalidateQueries(['reviews', shopId])
   });
 
   const handleLike = async () => {
@@ -47,17 +73,29 @@ const DetailPage = () => {
       Swal.fire('Error', '해당 기능은 로그인 후 이용 가능합니다.', 'error');
       return;
     }
-    if (isLiked) await DeleteLikeMutation({ userId, shopId });
-    else await AddLikeMutation({ userId, shopId, shop_name });
+    if (isLiked) await deleteLikeMutation.mutateAsync({ userId, shopId });
+    else await addLikeMutation.mutateAsync({ userId, shopId, shop_name });
   };
 
-  const handleEdit = (commentId) => {
-    // 댓글 수정 로직
+  const handleAddReview = async () => {
+    if (!newReview.trim()) {
+      Swal.fire('Error', '입력 후 등록해주세요.', 'error');
+      return;
+    }
+    await addReviewMutation.mutateAsync({ userId, shopId, content: newReview });
   };
 
-  const handleDelete = (commentId) => {
-    // 댓글 삭제 로직
+  const handleUpdateReview = async (reviewId, newContent) => {
+    await updateReviewMutation.mutateAsync({ reviewId, content: newContent });
   };
+
+  const handleDeleteReview = async (reviewId) => {
+    await deleteReviewMutation.mutateAsync(reviewId);
+  };
+
+  if (!userInfo) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex min-h-screen justify-center">
@@ -79,18 +117,40 @@ const DetailPage = () => {
               <textarea
                 placeholder="리뷰를 남겨주세요"
                 className="h-[70px] w-full resize-none rounded-lg border p-2 focus:outline-active"
+                value={newReview}
+                onChange={(e) => setNewReview(e.target.value)}
               />
-              <button className="h-[35px] w-[76px] rounded-lg bg-point text-white">등록</button>
+              <button onClick={handleAddReview} className="h-[35px] w-[76px] rounded-lg bg-point text-white">
+                등록
+              </button>
             </div>
           </section>
           <section className="mt-6 space-y-[30px]">
-            {[1, 2, 3].map((item, index) => (
-              <Comment 
-                key={index} 
-                comment={{ id: index, text: '안녕하세요', userId: userInfo ? userInfo.id : '' }} 
-                onEdit={handleEdit} 
-                onDelete={handleDelete} 
-              />
+            {reviews?.map((review) => (
+              <div key={review.id} className="rounded-lg bg-white p-4 shadow-md">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-bold">{review.user_name}</p>
+                    <p>{review.content}</p>
+                  </div>
+                  {userId === review.user_id && (
+                    <div className="flex space-x-[22px]">
+                      <button
+                        onClick={() => handleUpdateReview(review.id, prompt('리뷰를 수정하세요:', review.content))}
+                        className="h-[35px] w-[76px] rounded-lg bg-point text-white"
+                      >
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleDeleteReview(review.id)}
+                        className="h-[35px] w-[76px] rounded-lg bg-main text-white"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
           </section>
         </div>
