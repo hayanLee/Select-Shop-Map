@@ -1,4 +1,3 @@
-import { FaMagnifyingGlass } from 'react-icons/fa6';
 import { LuArrowRightToLine } from 'react-icons/lu';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from '../../api/auth';
@@ -23,13 +22,6 @@ function Header() {
           <p className="text-xl font-bold text-blue-950">칠리칠리 소품랜드</p>
         </div>
         <div className="flex items-center">
-          <div className="relative">
-            <FaMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 transform text-blue-950" />
-            <input
-              placeholder="지역을 검색해 주세요..."
-              className="h-8 w-64 rounded-3xl pl-10 pr-4 focus:outline-active"
-            />
-          </div>
           {storedUserInfo ? (
             <div className="flex items-center">
               <Link to="/mypage" className="ml-3 text-blue-950">
