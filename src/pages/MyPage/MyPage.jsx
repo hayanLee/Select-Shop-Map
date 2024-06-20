@@ -1,37 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import SavedShopsList from './SavedShopsList.jsx';
 import ReviewsList from './ReviewsList.jsx';
 import { getUserInfo } from '../../api/auth';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const MyPage = () => {
+  const { userInfo } = useContext(AuthContext);
   const [nickname, setNickname] = useState('');
   const [userId, setUserId] = useState('');
-
-  const fetchNickname = async () => {
-    try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (!userInfo || !userInfo.id) {
-        console.error('No user info found in localStorage.');
-        return;
-      }
-
-      const userId = userInfo.id;
-      const user = await getUserInfo(userId); // getUserInfo 함수 호출
-
-      if (user) {
-        setNickname(user.nickname);
-        setUserId(userId);
-      } else {
-        console.error('유저 정보를 불러오는데 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('닉네임을 불러오는데에 실패했습니다.', error.message);
-    }
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchNickname = async () => {
+      try {
+        if (userInfo) {
+          const userId = userInfo.id;
+          const user = await getUserInfo(userId);
+
+          if (user) {
+            setNickname(user.nickname);
+            setUserId(userId);
+          } else {
+            console.error('유저 정보를 불러오는데 실패했습니다.');
+          }
+        }
+      } catch (error) {
+        console.error('닉네임을 불러오는데에 실패했습니다.', error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchNickname();
-  }, []);
+  }, [userInfo]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center">

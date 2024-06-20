@@ -1,11 +1,12 @@
+import React, { useEffect, useState, useContext } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react';
 import { PiHeart, PiHeartFill } from 'react-icons/pi';
 import { useLocation, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { addLike, deleteLike, isLikedShop } from '../../api/like';
 import { addReview, deleteReview, getShopReviewsByShopId, modifyReview } from '../../api/review';
 import mainIcon from '../../assets/mainIcon.png';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const DetailPage = () => {
   const [isLiked, setIsLiked] = useState(false);
@@ -13,17 +14,16 @@ const DetailPage = () => {
   const [newReview, setNewReview] = useState('');
   const { shopId } = useParams();
   const location = useLocation();
-  const storedUserInfo = localStorage.getItem('userInfo');
   const queryClient = useQueryClient();
+  const { isAuthenticated, userInfo } = useContext(AuthContext);
 
   const { place_name: shop_name, road_address_name } = location.state;
 
   useEffect(() => {
-    if (storedUserInfo) {
-      const { id } = JSON.parse(storedUserInfo);
-      setUserId(id);
+    if (userInfo) {
+      setUserId(userInfo.id);
     }
-  }, [storedUserInfo]);
+  }, [userInfo]);
 
   useEffect(() => {
     (async () => {
@@ -69,7 +69,7 @@ const DetailPage = () => {
   });
 
   const handleLike = async () => {
-    if (!storedUserInfo) {
+    if (!isAuthenticated) {
       Swal.fire('Error', '해당 기능은 로그인 후 이용 가능합니다.', 'error');
       return;
     }
@@ -78,7 +78,6 @@ const DetailPage = () => {
   };
 
   const handleAddReview = async () => {
-
     if (!newReview.trim()) {
       Swal.fire('Error', '입력 후 등록해주세요.', 'error');
       return;
