@@ -13,13 +13,16 @@ export const useKakaoMap = () => useContext(KakaoMapContext);
 export function KakaoMapProvider({ children }) {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('홍대 소품샵'); // 검색어
+  const [searchKeyword, setSearchKeyword] = useState(''); // 검색어
   const [mapInstance, setKakaoMapInstance] = useState(null); // 지도 객체
   const [clusterer, setClusterer] = useState(null); // 클러스터
+  const [geocoder, setGeocoder] = useState(null);
   const mapContainerElRef = useRef(null);
   const markersRef = useRef([]);
   const infoWindowsRef = useRef([]);
- 
+  const [regionAddress, setRegionAddress] = useState(''); // 지역 주소 저장
+  const searchButtonRef = useRef(null); // 검색 버튼 참조
+
   const { data: places = [] } = useQuery({
     queryKey: ['places', { searchKeyword }],
     queryFn: () => searchPlaces(searchKeyword),
@@ -66,16 +69,51 @@ export function KakaoMapProvider({ children }) {
         averageCenter: true,
         minLevel: 6
       });
-
       setClusterer(clusterer);
+
+      // 주소-좌표 변환 객체
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      setGeocoder(geocoder);
 
       // 클러스터 클릭 이벤트 등록
       window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster) {
         const level = mapInstance.getLevel();
         mapInstance.setLevel(level - 2, { anchor: cluster.getCenter() }); // 적절한 레벨씩 확대
       });
+
+      // 지도 클릭 했을 때 클릭 위치 좌표에 대한 주소 정보
+      window.kakao.maps.event.addListener(mapInstance, 'idle', function () {
+        searchDetailAddrFromCoords(geocoder, mapInstance.getCenter(), function (result, status) {
+          if (status === window.kakao.maps.services.Status.OK) {
+            const roadAddress = result[0].address;
+            console.log(roadAddress);
+            const regionAddr = roadAddress ? `${roadAddress.region_3depth_name}` : '';
+            // const regionAddr = roadAddress ? `${roadAddress.region_1depth_name} ${roadAddress.region_2depth_name}` : '';
+            setRegionAddress(regionAddr);
+
+            if (searchButtonRef.current) {
+              searchButtonRef.current.style.display = 'block';
+            }
+          }
+        });
+      });
     }
   };
+
+  const handleSearchButtonClick = () => {
+    if (regionAddress) {
+      setSearchKeyword(`${regionAddress} 소품샵`);
+      if (searchButtonRef.current) {
+        searchButtonRef.current.style.display = 'none';
+      }
+    }
+  };
+
+  // 좌표로 상세 주소 정보를 요청
+  function searchDetailAddrFromCoords(geocoder, coords, callback) {
+    console.log('>>>>', coords);
+    geocoder.coord2Address(coords.getLng(), coords.getLat(), callback);
+  }
 
   // 마커를 생성하는 함수
   const createMarkers = () => {
@@ -94,7 +132,7 @@ export function KakaoMapProvider({ children }) {
             markerIcon, // 마커 이미지 URL
             new window.kakao.maps.Size(24, 35), // 마커 이미지 크기
             {
-              offset: new window.kakao.maps.Point(12, 35), // 마커 이미지의 좌표
+              offset: new window.kakao.maps.Point(12, 35) // 마커 이미지의 좌표
             }
           )
         });
@@ -127,7 +165,7 @@ export function KakaoMapProvider({ children }) {
             iwElement.style.background = 'none';
             iwElement.style.boxShadow = 'none';
           }
-          console.log(`${place.place_url}`)
+          console.log(`${place.place_url}`);
         };
 
         window.kakao.maps.event.addListener(marker, 'click', handleMarkerClick);
@@ -182,7 +220,18 @@ export function KakaoMapProvider({ children }) {
     isMapLoaded // 로딩 상태 추가
   };
 
-  return <KakaoMapContext.Provider value={value}>{children}</KakaoMapContext.Provider>;
+  return (
+    <KakaoMapContext.Provider value={value}>
+      {children}
+      <div
+        ref={searchButtonRef}
+        className="absolute bottom-2 left-1/2 z-10 hidden -translate-x-1/2 transform cursor-pointer rounded border border-gray-300 bg-point p-4 shadow-lg"
+        onClick={handleSearchButtonClick}
+      >
+        현재 지도에서 재검색
+      </div>
+    </KakaoMapContext.Provider>
+  );
 }
 
 function loadKakaoMapSDK(onLoadCallback) {
@@ -196,32 +245,20 @@ function loadKakaoMapSDK(onLoadCallback) {
   document.head.appendChild(script);
 }
 
-async function getCurrentPosition() {
-  return new Promise((resolve, reject) => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          resolve({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-          });
-        },
-        (error) => reject(error)
-      );
-    } else {
-      reject(new Error('Geolocation is not supported by this browser.'));
-    }
-  });
-}
-
-// function getCurrentAddress({ lat, lon }) {
-//   axios
-//     .get(`https://dapi.kakao.com/v2/local/geo/coord2regioncode.json?x=${lat}&y=${lon}`, {
-//       headers: { Authorization: `KakaoAK ${KAKAO_KEY}` }
-//     })
-//     .then((result) => {
-//       //법정동 기준으로 동단위의 값을 가져온다
-//       // let location = result.documents[0].region_3depth_name;
-//       console.log(result);
-//     });
+// async function getCurrentPosition() {
+//   return new Promise((resolve, reject) => {
+//     if (navigator.geolocation) {
+//       navigator.geolocation.getCurrentPosition(
+//         (position) => {
+//           resolve({
+//             lat: position.coords.latitude,
+//             lon: position.coords.longitude
+//           });
+//         },
+//         (error) => reject(error)
+//       );
+//     } else {
+//       reject(new Error('Geolocation is not supported by this browser.'));
+//     }
+//   });
 // }
