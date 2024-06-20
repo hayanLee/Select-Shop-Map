@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { searchPlaces } from '../../api/kakao/searchPlaces';
 import mainIcon from '../../assets/mainIcon.png';
+import markerIcon from '../../assets/marker.png';
+
 const KAKAO_KEY = import.meta.env.VITE_KAKAO_KEY;
 
 const KakaoMapContext = createContext();
@@ -17,7 +19,7 @@ export function KakaoMapProvider({ children }) {
   const mapContainerElRef = useRef(null);
   const markersRef = useRef([]);
   const infoWindowsRef = useRef([]);
-
+ 
   const { data: places = [] } = useQuery({
     queryKey: ['places', { searchKeyword }],
     queryFn: () => searchPlaces(searchKeyword),
@@ -87,7 +89,14 @@ export function KakaoMapProvider({ children }) {
         // 반복문 돌면서 마커 객체 만들기
         const marker = new window.kakao.maps.Marker({
           position: markerPosition,
-          title: place.place_name
+          title: place.place_name,
+          image: new window.kakao.maps.MarkerImage(
+            markerIcon, // 마커 이미지 URL
+            new window.kakao.maps.Size(24, 35), // 마커 이미지 크기
+            {
+              offset: new window.kakao.maps.Point(12, 35), // 마커 이미지의 좌표
+            }
+          )
         });
 
         const content = `
@@ -118,6 +127,7 @@ export function KakaoMapProvider({ children }) {
             iwElement.style.background = 'none';
             iwElement.style.boxShadow = 'none';
           }
+          console.log(`${place.place_url}`)
         };
 
         window.kakao.maps.event.addListener(marker, 'click', handleMarkerClick);
