@@ -18,8 +18,11 @@
 | 김도연 | 팀원 | 마이페이지 - 저장한 소품샵과 작성한 리뷰들을 마이페이지에서 확인할 수 있는 기능
  <br/> 프로젝트 리팩토링 |
 ## 사용 기술 스택
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-
+![Context-API](https://img.shields.io/badge/Context--Api-000000?style=for-the-badge&logo=react)
+![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 
 ### Commit Convention
