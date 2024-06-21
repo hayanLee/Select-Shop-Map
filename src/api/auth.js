@@ -27,7 +27,6 @@ export const loginWithEmail = async ({ email, password }) => {
     if (error) throw error;
     if (data && data.user) {
       Swal.fire('Success', '로그인에 성공하였습니다.', 'success');
-      localStorage.clear();
       return await getUserInfo(data.user.id);
     }
   } catch (error) {
