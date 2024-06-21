@@ -70,7 +70,7 @@ export function KakaoMapProvider({ children }) {
       const options = {
         center:
           savedX && savedY ? new window.kakao.maps.LatLng(savedY, savedX) : new window.kakao.maps.LatLng(lat, lon), // 저장된 위치 또는 현재 위치
-        level: 5
+        level: 3
       };
 
       // mapInstance = 지도
@@ -99,7 +99,6 @@ export function KakaoMapProvider({ children }) {
       window.kakao.maps.event.addListener(mapInstance, 'idle', function () {
         searchDetailAddrFromCoords(geocoder, mapInstance.getCenter(), function (result, status) {
           if (status === window.kakao.maps.services.Status.OK) {
-            console.log(result[0]);
             const roadAddress = result[0].address;
             const regionAddr = roadAddress ? `${roadAddress.region_3depth_name}` : '';
             setRegionAddress(regionAddr);
