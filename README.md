@@ -1,14 +1,15 @@
-# 전국 소품샵 지도
-
-##프로젝트 소개
+## ✨프로젝트 소개
 
 전국 소품샵 위치를 제공하는 웹 지도 서비스
 
-##개발기간
-
+## 개발기간
 2024.06.17 ~ 2024.06.20
 
-##멤버구성
+## 멤버구성
+
+## 사용 기술 스택
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+
 
 
 ### Commit Convention
